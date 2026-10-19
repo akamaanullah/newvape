@@ -24,6 +24,7 @@ class HomeController extends Controller
         $latestBlogs = BlogPost::latest(4);
         $heroSlides = ThemeSection::getHeroSlides();
         $twinBanners = ThemeSection::getTwinBanners();
+        $seoContent = ThemeSection::getSeoContent();
 
         $this->render('front.home.index', [
             'page_title' => 'Online Vape Store | Every Flavor. In Stock.',
@@ -39,7 +40,8 @@ class HomeController extends Controller
             'hempThc' => $hempThc,
             'latestBlogs' => $latestBlogs,
             'heroSlides' => $heroSlides,
-            'twinBanners' => $twinBanners
+            'twinBanners' => $twinBanners,
+            'seoContent' => $seoContent
         ]);
     }
 }

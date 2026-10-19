@@ -200,4 +200,49 @@ class ThemeSection extends Model
 
         return self::setSetting('theme_twin_banners', json_encode($clean, JSON_UNESCAPED_UNICODE), 'storefront');
     }
+
+    /**
+     * Get SEO / Trusted Vape Store Content configuration
+     */
+    public static function getSeoContent()
+    {
+        $raw = self::getSetting('theme_seo_trusted_content');
+        if ($raw) {
+            $decoded = json_decode($raw, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        // Default exact content from homepage
+        return [
+            'is_active'       => 1,
+            'title'           => 'Your Trusted Online Vape Store',
+            'paragraph_1'     => 'We are a trusted online vape shop where you can buy vapes online with confidence. We stock a wide selection of <a href="category?cat=disposables">disposable vapes</a>, <a href="category?cat=e-liquids">e-liquids</a>, <a href="category?cat=nicotine-pouches">nicotine pouches</a>, and <a href="category?cat=hemp-thc">hemp &amp; THC products</a>, all from brands you know and love. Every product sold on our store is 100% authentic and ships fast from within the United States.',
+            'paragraph_2'     => 'How much does a vape cost? Disposable vapes start at $8.99, nicotine pouches at $6.99, and most high-puff devices stay under $25. We back that up with a price match guarantee: find a lower price at another online vape store and we will match it. No coupon hunting needed, the price you see is already the low one.',
+            'paragraph_3'     => 'Looking for high-puff devices? Browse our collection of <a href="category">5,000 to 50,000+ puff disposable vapes</a> from top brands like Geek Bar, Lost Mary, RAZ, and more. We also carry vape juices in nicotine salt, freebase, TFN, and zero-nicotine options, plus vape pod systems and starter kits for every experience level. Interested in cannabinoids? Shop our <a href="category?cat=hemp-thc">THCA vapes</a>, <a href="category?cat=hemp-thc">THC-P disposables</a>, and <a href="category?cat=hemp-thc">hemp prerolls</a>.',
+            'paragraph_4'     => 'So what makes us the best online vape store? Ask the people who shop here: our customers rate us 4.7 out of 5 stars across more than 1,700 reviews. Orders ship the same day, every purchase is covered by a 14-day return policy, and our support team actually answers when you need help with an order, a device, or a flavor recommendation.',
+            'disclaimer_text' => 'All products on this site are intended for adults of legal smoking age only. These products have not been evaluated by the Food and Drug Administration and are not intended to diagnose, treat, prevent, or cure any disease or condition. Keep all products out of the reach of children and pets.',
+            'compliance_text' => 'Our store is fully PACT Act compliant. We verify every order meets federal and state regulations so you can shop our online vape store worry-free.'
+        ];
+    }
+
+    /**
+     * Save SEO / Trusted Vape Store Content configuration
+     */
+    public static function saveSeoContent(array $data)
+    {
+        $clean = [
+            'is_active'       => !empty($data['is_active']) ? 1 : 0,
+            'title'           => trim($data['title'] ?? 'Your Trusted Online Vape Store'),
+            'paragraph_1'     => trim($data['paragraph_1'] ?? ''),
+            'paragraph_2'     => trim($data['paragraph_2'] ?? ''),
+            'paragraph_3'     => trim($data['paragraph_3'] ?? ''),
+            'paragraph_4'     => trim($data['paragraph_4'] ?? ''),
+            'disclaimer_text' => trim($data['disclaimer_text'] ?? ''),
+            'compliance_text' => trim($data['compliance_text'] ?? '')
+        ];
+
+        return self::setSetting('theme_seo_trusted_content', json_encode($clean, JSON_UNESCAPED_UNICODE), 'storefront');
+    }
 }

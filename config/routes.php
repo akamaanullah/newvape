@@ -114,4 +114,5 @@ return [
     'admin/theme-sections/save-announcements' => [\App\Controllers\Admin\ThemeSectionController::class, 'saveAnnouncements'],
     'admin/theme-sections/save-hero'          => [\App\Controllers\Admin\ThemeSectionController::class, 'saveHero'],
     'admin/theme-sections/save-twin-banners'  => [\App\Controllers\Admin\ThemeSectionController::class, 'saveTwinBanners'],
+    'admin/theme-sections/save-seo-content'   => [\App\Controllers\Admin\ThemeSectionController::class, 'saveSeoContent'],
 ];

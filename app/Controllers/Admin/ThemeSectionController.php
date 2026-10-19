@@ -13,6 +13,7 @@ class ThemeSectionController extends AdminController
         $announcements = ThemeSection::getAnnouncementBars();
         $heroSlides = ThemeSection::getHeroSlides();
         $twinBanners = ThemeSection::getTwinBanners();
+        $seoContent = ThemeSection::getSeoContent();
 
         $activeTab = $_GET['tab'] ?? 'hero';
 
@@ -23,6 +24,7 @@ class ThemeSectionController extends AdminController
             'announcements'      => $announcements,
             'heroSlides'         => $heroSlides,
             'twinBanners'        => $twinBanners,
+            'seoContent'         => $seoContent,
             'activeTab'          => $activeTab,
             'success'            => $_GET['success'] ?? null,
             'error'              => $_GET['error'] ?? null
@@ -86,5 +88,31 @@ class ThemeSectionController extends AdminController
         }
 
         $this->redirect('admin/theme-sections?tab=twin&error=' . urlencode('Failed to save promo banner cards'));
+    }
+
+    /**
+     * Save SEO / Trusted Store Content Section
+     */
+    public function saveSeoContent()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'is_active'       => isset($_POST['is_active']) ? 1 : 0,
+                'title'           => $_POST['title'] ?? '',
+                'paragraph_1'     => $_POST['paragraph_1'] ?? '',
+                'paragraph_2'     => $_POST['paragraph_2'] ?? '',
+                'paragraph_3'     => $_POST['paragraph_3'] ?? '',
+                'paragraph_4'     => $_POST['paragraph_4'] ?? '',
+                'disclaimer_text' => $_POST['disclaimer_text'] ?? '',
+                'compliance_text' => $_POST['compliance_text'] ?? ''
+            ];
+
+            if (ThemeSection::saveSeoContent($data)) {
+                $this->redirect('admin/theme-sections?tab=trusted_store&success=' . urlencode('Trusted Store & SEO Content updated successfully'));
+                return;
+            }
+        }
+
+        $this->redirect('admin/theme-sections?tab=trusted_store&error=' . urlencode('Failed to save SEO content section'));
     }
 }
