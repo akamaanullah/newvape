@@ -12,37 +12,88 @@ include dirname(__DIR__) . '/includes/header.php';
 <!-- ==========================================
      HERO BANNER SECTION
      ========================================== -->
+<!-- ==========================================
+     HERO BANNER SECTION
+     ========================================== -->
 <section class="hero-banner-section">
   <div class="hero-banner-container">
-    <div class="hero-banner-card">
-      
-      <!-- Background Banner Image -->
-      <img 
-        src="assets/images/foger-switch-pro-new-pod-flavors-d-banner.webp" 
-        alt="Foger Switch Pro - Every Flavor. In Stock." 
-        class="hero-banner-bg"
-      >
+    <div class="hero-slider-wrapper" id="heroSliderWrapper">
+      <div class="hero-slider-slides">
+        <?php 
+        $activeSlides = array_filter($heroSlides ?? [], function($s) { return !empty($s['is_active']); });
+        if (empty($activeSlides)) {
+            $activeSlides = [
+                [
+                    'badge_text'  => 'NEW FLAVORS',
+                    'title'       => 'Every Flavor. In Stock.',
+                    'subtitle'    => 'The full Foger Switch Pro lineup is here.',
+                    'button_text' => 'Find Your Flavor',
+                    'button_url'  => 'category?b=foger',
+                    'image_url'   => 'assets/images/foger-switch-pro-new-pod-flavors-d-banner.webp',
+                ]
+            ];
+        }
+        $slideIdx = 0;
+        foreach ($activeSlides as $slide):
+            $isFirst = ($slideIdx === 0);
+            $imgSrc = !empty($slide['image_url']) ? $slide['image_url'] : 'assets/images/foger-switch-pro-new-pod-flavors-d-banner.webp';
+            $btnUrl = !empty($slide['button_url']) ? (preg_match('~^(https?://|//|#)~i', $slide['button_url']) ? $slide['button_url'] : url($slide['button_url'])) : url('category');
+        ?>
+        <div class="hero-banner-card hero-slide-item <?= $isFirst ? 'active' : '' ?>" data-slide="<?= $slideIdx ?>">
+          <!-- Background Banner Image -->
+          <img 
+            src="<?= htmlspecialchars($imgSrc) ?>" 
+            alt="<?= htmlspecialchars($slide['title']) ?>" 
+            class="hero-banner-bg"
+          >
 
-      <!-- Left Text & CTA Content -->
-      <div class="hero-banner-content">
-        <div class="hero-pill-badge">
-          <span class="hero-pill-dot"></span>
-          NEW FLAVORS
+          <!-- Left Text & CTA Content -->
+          <div class="hero-banner-content">
+            <?php if (!empty($slide['badge_text'])): ?>
+            <div class="hero-pill-badge">
+              <span class="hero-pill-dot"></span>
+              <?= htmlspecialchars($slide['badge_text']) ?>
+            </div>
+            <?php endif; ?>
+            
+            <h1 class="hero-title"><?= htmlspecialchars($slide['title']) ?></h1>
+            
+            <?php if (!empty($slide['subtitle'])): ?>
+            <p class="hero-subtitle"><?= htmlspecialchars($slide['subtitle']) ?></p>
+            <?php endif; ?>
+            
+            <a href="<?= htmlspecialchars($btnUrl) ?>" class="hero-cta-btn">
+              <?= htmlspecialchars(!empty($slide['button_text']) ? $slide['button_text'] : 'Shop Now') ?>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+          </div>
         </div>
-        
-        <h1 class="hero-title">Every Flavor. In Stock.</h1>
-        
-        <p class="hero-subtitle">The full Foger Switch Pro lineup is here.</p>
-        
-        <a href="<?= url('category?b=foger') ?>" class="hero-cta-btn">
-          Find Your Flavor
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
-          </svg>
-        </a>
+        <?php $slideIdx++; endforeach; ?>
       </div>
 
+      <?php if (count($activeSlides) > 1): ?>
+      <!-- Slider Arrows -->
+      <button class="hero-slider-nav-btn prev" id="heroPrevBtn" aria-label="Previous Slide">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <button class="hero-slider-nav-btn next" id="heroNextBtn" aria-label="Next Slide">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+
+      <!-- Slider Dots -->
+      <div class="hero-slider-dots" id="heroSliderDots">
+        <?php for ($i = 0; $i < count($activeSlides); $i++): ?>
+        <button class="hero-slider-dot <?= $i === 0 ? 'active' : '' ?>" data-index="<?= $i ?>" aria-label="Slide <?= $i + 1 ?>"></button>
+        <?php endfor; ?>
+      </div>
+      <?php endif; ?>
     </div>
   </div>
 </section>
@@ -420,43 +471,42 @@ include dirname(__DIR__) . '/includes/header.php';
 <!-- ==========================================
      TWIN PROMO BANNERS SECTION
      ========================================== -->
+<!-- ==========================================
+     TWIN PROMO BANNERS SECTION
+     ========================================== -->
+<?php 
+$activeTwins = array_filter($twinBanners ?? [], function($b) { return !empty($b['is_active']); });
+if (!empty($activeTwins)): 
+?>
 <section class="twin-banners-section">
   <div class="container">
     <div class="twin-banners-grid">
       
-      <!-- Promo Banner 1: Foger Switch Pro -->
+      <?php foreach ($activeTwins as $card): 
+        $cardImg = !empty($card['image_url']) ? $card['image_url'] : 'assets/images/twin-banner.webp';
+        $cardBtnUrl = !empty($card['button_url']) ? (preg_match('~^(https?://|//|#)~i', $card['button_url']) ? $card['button_url'] : url($card['button_url'])) : url('category');
+      ?>
       <div class="promo-banner-card">
-        <img src="assets/images/twin-banner.webp" alt="Foger Switch Pro" class="promo-banner-bg">
+        <img src="<?= htmlspecialchars($cardImg) ?>" alt="<?= htmlspecialchars(strip_tags($card['title'])) ?>" class="promo-banner-bg">
         <div class="promo-banner-content">
-          <h3 class="promo-banner-title">Foger Switch Pro &mdash; Up to 30,000 Puffs</h3>
-          <p class="promo-banner-subtitle">Pod system with power bank &amp; OLED display.</p>
-          <a href="<?= url('category?b=foger') ?>" class="promo-banner-btn">
-            Shop Foger Switch Pro
+          <h3 class="promo-banner-title"><?= $card['title'] ?></h3>
+          <?php if (!empty($card['subtitle'])): ?>
+          <p class="promo-banner-subtitle"><?= $card['subtitle'] ?></p>
+          <?php endif; ?>
+          <a href="<?= htmlspecialchars($cardBtnUrl) ?>" class="promo-banner-btn">
+            <?= htmlspecialchars(!empty($card['button_text']) ? $card['button_text'] : 'Shop Now') ?>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
           </a>
         </div>
       </div>
-
-      <!-- Promo Banner 2: Entire Adjust Lineup -->
-      <div class="promo-banner-card">
-        <img src="assets/images/twin-banner.webp" alt="Entire Adjust Lineup" class="promo-banner-bg">
-        <div class="promo-banner-content">
-          <h3 class="promo-banner-title">Entire Adjust Lineup</h3>
-          <p class="promo-banner-subtitle">Tune your cool. Tune your flavor. Only $11.99.</p>
-          <a href="<?= url('category?b=adjust') ?>" class="promo-banner-btn">
-            Shop Adjust Series
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-          </a>
-        </div>
-      </div>
+      <?php endforeach; ?>
 
     </div>
   </div>
 </section>
+<?php endif; ?>
 
 <!-- ==========================================
      SHOP DISPOSABLE VAPES (4x4 GRID - 16 CARDS)

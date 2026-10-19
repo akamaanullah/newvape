@@ -105,4 +105,13 @@ return [
     'admin/blog-categories/store'  => [\App\Controllers\Admin\BlogController::class, 'storeCategory'],
     'admin/blog-categories/update' => [\App\Controllers\Admin\BlogController::class, 'updateCategory'],
     'admin/blog-categories/delete' => [\App\Controllers\Admin\BlogController::class, 'deleteCategory'],
+
+    // Admin UI / Theme Sections Management
+    'admin/theme-sections'                    => [\App\Controllers\Admin\ThemeSectionController::class, 'index'],
+    'admin/theme-sections.php'                => [\App\Controllers\Admin\ThemeSectionController::class, 'index'],
+    'admin/ui-sections'                       => [\App\Controllers\Admin\ThemeSectionController::class, 'index'],
+    'admin/ui-sections.php'                   => [\App\Controllers\Admin\ThemeSectionController::class, 'index'],
+    'admin/theme-sections/save-announcements' => [\App\Controllers\Admin\ThemeSectionController::class, 'saveAnnouncements'],
+    'admin/theme-sections/save-hero'          => [\App\Controllers\Admin\ThemeSectionController::class, 'saveHero'],
+    'admin/theme-sections/save-twin-banners'  => [\App\Controllers\Admin\ThemeSectionController::class, 'saveTwinBanners'],
 ];

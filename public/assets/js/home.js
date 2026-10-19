@@ -138,4 +138,89 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
+
+  // 5. Dynamic Hero Banner Slider Controls & Auto-Rotation
+  const heroWrapper = document.getElementById('heroSliderWrapper');
+  if (heroWrapper) {
+    const slides = heroWrapper.querySelectorAll('.hero-slide-item');
+    const dots = heroWrapper.querySelectorAll('.hero-slider-dot');
+    const prevBtn = heroWrapper.querySelector('#heroPrevBtn');
+    const nextBtn = heroWrapper.querySelector('#heroNextBtn');
+    let currentIndex = 0;
+    let autoPlayTimer = null;
+
+    if (slides.length > 1) {
+      const showSlide = (index) => {
+        if (index < 0) {
+          index = slides.length - 1;
+        } else if (index >= slides.length) {
+          index = 0;
+        }
+        currentIndex = index;
+
+        slides.forEach((slide, idx) => {
+          if (idx === currentIndex) {
+            slide.classList.add('active');
+          } else {
+            slide.classList.remove('active');
+          }
+        });
+
+        dots.forEach((dot, idx) => {
+          if (idx === currentIndex) {
+            dot.classList.add('active');
+          } else {
+            dot.classList.remove('active');
+          }
+        });
+      };
+
+      const startAutoPlay = () => {
+        stopAutoPlay();
+        autoPlayTimer = setInterval(() => {
+          showSlide(currentIndex + 1);
+        }, 5500);
+      };
+
+      const stopAutoPlay = () => {
+        if (autoPlayTimer) {
+          clearInterval(autoPlayTimer);
+          autoPlayTimer = null;
+        }
+      };
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          showSlide(currentIndex + 1);
+          startAutoPlay();
+        });
+      }
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          showSlide(currentIndex - 1);
+          startAutoPlay();
+        });
+      }
+
+      dots.forEach((dot) => {
+        dot.addEventListener('click', (e) => {
+          e.preventDefault();
+          const targetIndex = parseInt(dot.getAttribute('data-index'), 10);
+          if (!isNaN(targetIndex)) {
+            showSlide(targetIndex);
+            startAutoPlay();
+          }
+        });
+      });
+
+      heroWrapper.addEventListener('mouseenter', stopAutoPlay);
+      heroWrapper.addEventListener('mouseleave', startAutoPlay);
+
+      // Start initial auto play
+      startAutoPlay();
+    }
+  }
 });

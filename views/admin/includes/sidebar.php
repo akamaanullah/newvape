@@ -152,6 +152,16 @@ $nav_active = isset($current_admin_page) ? $current_admin_page : 'dashboard';
         </a>
       </li>
       <li class="sidebar-nav-item">
+        <a href="<?= url('admin/theme-sections') ?>" class="sidebar-nav-link <?php echo ($nav_active === 'theme-sections') ? 'active' : ''; ?>">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <span>Theme Sections</span>
+        </a>
+      </li>
+      <li class="sidebar-nav-item">
         <a href="<?= url() ?>" target="_blank" class="sidebar-nav-link" title="Open Storefront in New Tab">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>

@@ -13,6 +13,17 @@ if (class_exists('\\App\\Models\\Menu')) {
     $mainMenuTree = \App\Models\Menu::getTreeByLocation('main_menu');
 }
 
+// Fetch dynamic Header Announcement & Warning Bars
+$themeAnnouncements = class_exists('\\App\\Models\\ThemeSection') 
+    ? \App\Models\ThemeSection::getAnnouncementBars() 
+    : [
+        'fda_warning_active' => 1,
+        'fda_warning_text'   => 'WARNING: This product contains nicotine. Nicotine is an addictive chemical.',
+        'promo_bar_active'   => 1,
+        'promo_bar_text'     => 'Free shipping on orders over $150',
+        'promo_bar_link'     => ''
+    ];
+
 // Helper to format storefront navigation links cleanly
 $formatNavUrl = function($link) {
     if (empty($link) || $link === '#') return '#';
@@ -43,24 +54,32 @@ $formatNavUrl = function($link) {
   <!-- ==========================================
        TOP BAR 1: FDA NICOTINE WARNING
        ========================================== -->
+  <?php if (!empty($themeAnnouncements['fda_warning_active']) && !empty($themeAnnouncements['fda_warning_text'])): ?>
   <div class="nicotine-warning-bar">
     <div class="container">
       <p class="nicotine-warning-text">
-        <strong>WARNING:</strong> This product contains nicotine. Nicotine is an addictive chemical.
+        <?= $themeAnnouncements['fda_warning_text'] ?>
       </p>
     </div>
   </div>
+  <?php endif; ?>
 
   <!-- ==========================================
        TOP BAR 2: FREE SHIPPING PROMO
        ========================================== -->
+  <?php if (!empty($themeAnnouncements['promo_bar_active']) && !empty($themeAnnouncements['promo_bar_text'])): ?>
   <div class="promo-announcement-bar">
     <div class="container">
-      <p class="promo-announcement-text">
-        Free shipping on orders over $150
-      </p>
+      <?php if (!empty($themeAnnouncements['promo_bar_link'])): ?>
+        <a href="<?= htmlspecialchars($themeAnnouncements['promo_bar_link']) ?>" class="promo-announcement-link" style="color: inherit; text-decoration: none;">
+          <p class="promo-announcement-text"><?= htmlspecialchars($themeAnnouncements['promo_bar_text']) ?></p>
+        </a>
+      <?php else: ?>
+        <p class="promo-announcement-text"><?= htmlspecialchars($themeAnnouncements['promo_bar_text']) ?></p>
+      <?php endif; ?>
     </div>
   </div>
+  <?php endif; ?>
 
   <!-- ==========================================
        MAIN HEADER (LOGO, SEARCH, USER ACTIONS)
