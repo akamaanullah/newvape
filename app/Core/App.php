@@ -33,6 +33,18 @@ class App
             }
         }
 
+        // Dynamic route matching for collections (/collections/{slug} or /collection/{slug})
+        if (preg_match('#^collections?/(.+)$#', $trimmedUri, $matches)) {
+            $_GET['slug'] = basename($matches[1]);
+            return $this->dispatch([\App\Controllers\CollectionController::class, 'show']);
+        }
+
+        // Dynamic route matching for category (/category/{slug})
+        if (preg_match('#^category/(.+)$#', $trimmedUri, $matches)) {
+            $_GET['cat'] = basename($matches[1]);
+            return $this->dispatch([\App\Controllers\CategoryController::class, 'index']);
+        }
+
         // 404 Not Found
         http_response_code(404);
         View::render('errors.404', ['uri' => $uri]);

@@ -166,6 +166,218 @@ class Product extends Model
     }
 
     /**
+     * Get products for a collection with comprehensive filtering & sorting
+     */
+    public static function getCollectionProducts($slugOrId = null, array $filters = [])
+    {
+        $db = self::getDB();
+        if (!$db) return [];
+
+        try {
+            $params = [];
+            $where = ["p.status = 'published'"];
+
+            if (!empty($slugOrId) && $slugOrId !== 'all' && $slugOrId !== 'shop') {
+                if (is_numeric($slugOrId)) {
+                    $where[] = "pc.collection_id = ?";
+                    $params[] = (int)$slugOrId;
+                } else {
+                    $where[] = "(c.slug = ? OR pc.collection_id = (SELECT id FROM collections WHERE slug = ? LIMIT 1))";
+                    $params[] = $slugOrId;
+                    $params[] = $slugOrId;
+                }
+            }
+
+            // Brand filter (single or array)
+            if (!empty($filters['brand'])) {
+                $brand = $filters['brand'];
+                if (is_array($brand)) {
+                    $placeholders = implode(',', array_fill(0, count($brand), '?'));
+                    $where[] = "(b.slug IN ($placeholders) OR b.name IN ($placeholders))";
+                    $params = array_merge($params, $brand, $brand);
+                } else {
+                    $where[] = "(b.slug = ? OR b.name = ?)";
+                    $params[] = $brand;
+                    $params[] = $brand;
+                }
+            }
+
+            // Min & Max Price
+            if (isset($filters['min_price']) && is_numeric($filters['min_price'])) {
+                $where[] = "p.base_price >= ?";
+                $params[] = (float)$filters['min_price'];
+            }
+            if (isset($filters['max_price']) && is_numeric($filters['max_price'])) {
+                $where[] = "p.base_price <= ?";
+                $params[] = (float)$filters['max_price'];
+            }
+
+            // In Stock filter
+            if (!empty($filters['in_stock'])) {
+                $where[] = "p.stock_quantity > 0 AND p.stock_status != 'Out of Stock'";
+            }
+
+            // Search query
+            if (!empty($filters['q'])) {
+                $where[] = "(p.title LIKE ? OR p.name LIKE ? OR p.short_desc LIKE ? OR b.name LIKE ?)";
+                $kw = '%' . trim($filters['q']) . '%';
+                $params[] = $kw;
+                $params[] = $kw;
+                $params[] = $kw;
+                $params[] = $kw;
+            }
+
+            // Sorting
+            $orderBy = "p.id DESC";
+            if (!empty($filters['sort'])) {
+                switch ($filters['sort']) {
+                    case 'price-asc':
+                        $orderBy = "p.base_price ASC";
+                        break;
+                    case 'price-desc':
+                        $orderBy = "p.base_price DESC";
+                        break;
+                    case 'name':
+                    case 'name-asc':
+                        $orderBy = "COALESCE(p.title, p.name) ASC";
+                        break;
+                    case 'newest':
+                        $orderBy = "p.created_at DESC, p.id DESC";
+                        break;
+                    case 'bestseller':
+                        $orderBy = "p.is_bestseller DESC, p.reviews_count DESC";
+                        break;
+                    case 'rating':
+                        $orderBy = "p.rating_avg DESC, p.reviews_count DESC";
+                        break;
+                }
+            }
+
+            $whereClause = implode(" AND ", $where);
+            $limitClause = "";
+            if (!empty($filters['limit'])) {
+                $limit = (int)$filters['limit'];
+                $offset = !empty($filters['offset']) ? (int)$filters['offset'] : 0;
+                $limitClause = "LIMIT $offset, $limit";
+            }
+
+            $sql = "SELECT p.*, 
+                           b.name AS brand,
+                           b.slug AS brand_slug,
+                           COALESCE(c.name, 'Disposable') AS category,
+                           c.id AS collection_id,
+                           c.slug AS collection_slug,
+                           COALESCE(NULLIF(p.featured_image, ''), 'assets/images/no-image.svg') AS img,
+                           (SELECT spec_value FROM product_specifications WHERE product_id = p.id AND (spec_key = 'Puffs' OR spec_key = 'Puff Count') LIMIT 1) AS spec_puffs,
+                           (SELECT spec_value FROM product_specifications WHERE product_id = p.id AND (spec_key = 'Nicotine' OR spec_key = 'Nicotine Strength') LIMIT 1) AS spec_nicotine,
+                           (SELECT spec_value FROM product_specifications WHERE product_id = p.id AND (spec_key = 'Battery' OR spec_key = 'Battery Capacity') LIMIT 1) AS spec_battery
+                    FROM products p
+                    LEFT JOIN brands b ON p.brand_id = b.id
+                    LEFT JOIN product_collections pc ON p.id = pc.product_id
+                    LEFT JOIN collections c ON pc.collection_id = c.id
+                    WHERE $whereClause
+                    GROUP BY p.id
+                    ORDER BY $orderBy
+                    $limitClause";
+
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            error_log("Product::getCollectionProducts error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get brands with product counts for a collection (or all active products)
+     */
+    public static function getBrandsForCollection($slugOrId = null)
+    {
+        $db = self::getDB();
+        if (!$db) return [];
+
+        try {
+            $params = [];
+            $collectionJoin = "";
+            $where = "p.status = 'published'";
+
+            if (!empty($slugOrId) && $slugOrId !== 'all' && $slugOrId !== 'shop') {
+                $collectionJoin = "JOIN product_collections pc ON p.id = pc.product_id 
+                                   JOIN collections c ON pc.collection_id = c.id";
+                if (is_numeric($slugOrId)) {
+                    $where .= " AND pc.collection_id = ?";
+                    $params[] = (int)$slugOrId;
+                } else {
+                    $where .= " AND (c.slug = ? OR pc.collection_id = (SELECT id FROM collections WHERE slug = ? LIMIT 1))";
+                    $params[] = $slugOrId;
+                    $params[] = $slugOrId;
+                }
+            }
+
+            $sql = "SELECT b.id, b.name, b.slug, COUNT(DISTINCT p.id) AS products_count
+                    FROM brands b
+                    JOIN products p ON b.id = p.brand_id
+                    $collectionJoin
+                    WHERE $where
+                    GROUP BY b.id
+                    HAVING products_count > 0
+                    ORDER BY products_count DESC, b.name ASC";
+
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            error_log("Product::getBrandsForCollection error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get min and max price for products in a collection
+     */
+    public static function getPriceBounds($slugOrId = null)
+    {
+        $db = self::getDB();
+        if (!$db) return ['min' => 0, 'max' => 100];
+
+        try {
+            $params = [];
+            $collectionJoin = "";
+            $where = "p.status = 'published'";
+
+            if (!empty($slugOrId) && $slugOrId !== 'all' && $slugOrId !== 'shop') {
+                $collectionJoin = "JOIN product_collections pc ON p.id = pc.product_id 
+                                   JOIN collections c ON pc.collection_id = c.id";
+                if (is_numeric($slugOrId)) {
+                    $where .= " AND pc.collection_id = ?";
+                    $params[] = (int)$slugOrId;
+                } else {
+                    $where .= " AND (c.slug = ? OR pc.collection_id = (SELECT id FROM collections WHERE slug = ? LIMIT 1))";
+                    $params[] = $slugOrId;
+                    $params[] = $slugOrId;
+                }
+            }
+
+            $sql = "SELECT MIN(p.base_price) AS min_price, MAX(p.base_price) AS max_price
+                    FROM products p
+                    $collectionJoin
+                    WHERE $where";
+
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            $res = $stmt->fetch(PDO::FETCH_ASSOC);
+            return [
+                'min' => !empty($res['min_price']) ? floor($res['min_price']) : 0,
+                'max' => !empty($res['max_price']) ? ceil($res['max_price']) : 100,
+            ];
+        } catch (\Exception $e) {
+            error_log("Product::getPriceBounds error: " . $e->getMessage());
+            return ['min' => 0, 'max' => 100];
+        }
+    }
+
+    /**
      * Get Disposable Vapes for storefront
      */
     public static function disposables($limit = 16)

@@ -1,14 +1,19 @@
 /**
- * CATEGORY / SHOP LISTING PAGE JAVASCRIPT (category.js)
- * Dedicated JS for category page interactivity:
- * - Filter accordion expand/collapse
- * - Dual price range slider synchronization
- * - Quick filter pills filtering & active toggle
+ * COLLECTION / CATEGORY DETAIL PAGE JAVASCRIPT (category.js)
+ * Fully interactive e-commerce catalog engine:
+ * - Dynamic sidebar filter accordion
+ * - Dual price range slider
+ * - Brand checkboxes filtering
+ * - Puff count range filtering
+ * - Nicotine strength filtering
+ * - Stock availability filtering
+ * - Quick filter pills
+ * - Sorting (price asc/desc, name, newest, bestseller)
  * - Grid / List view mode switcher
- * - Sorting by position, price, name, newest
- * - Mobile filter off-canvas drawer open/close
- * - Add to Cart interactive feedback & cart badge increment
- * - Pagination (16 items per page, 20 total cards)
+ * - Dynamic pagination & results count
+ * - Mobile filter drawer
+ * - Add to Cart action with Cart counter integration
+ * - Clear all filters
  */
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -52,16 +57,17 @@ document.addEventListener('DOMContentLoaded', function () {
     let minVal = parseFloat(rangeMin.value);
     let maxVal = parseFloat(rangeMax.value);
     const minLimit = parseFloat(rangeMin.min) || 0;
-    const maxLimit = parseFloat(rangeMin.max) || 100;
+    const maxLimit = parseFloat(rangeMax.max) || 100;
     const totalSpan = maxLimit - minLimit;
 
-    // Keep minimum separation of 2 units
-    if (minVal > maxVal - 2) {
+    if (totalSpan <= 0) return;
+
+    if (minVal > maxVal - 1) {
       if (document.activeElement === rangeMin) {
-        minVal = maxVal - 2;
+        minVal = Math.max(minLimit, maxVal - 1);
         rangeMin.value = minVal;
       } else {
-        maxVal = minVal + 2;
+        maxVal = Math.min(maxLimit, minVal + 1);
         rangeMax.value = maxVal;
       }
     }
@@ -70,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const rightPercent = ((maxLimit - maxVal) / totalSpan) * 100;
 
     sliderFill.style.left = leftPercent + '%';
-    sliderFill.style.width = (100 - leftPercent - rightPercent) + '%';
+    sliderFill.style.width = Math.max(0, 100 - leftPercent - rightPercent) + '%';
 
     if (inputMin) inputMin.value = Math.round(minVal);
     if (inputMax) inputMax.value = Math.round(maxVal);
@@ -83,8 +89,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (inputMin) {
       inputMin.addEventListener('change', function () {
         let val = parseFloat(this.value) || 0;
-        if (val < 0) val = 0;
-        if (val > parseFloat(rangeMax.value) - 2) val = parseFloat(rangeMax.value) - 2;
+        if (val < parseFloat(rangeMin.min)) val = parseFloat(rangeMin.min);
+        if (val > parseFloat(rangeMax.value) - 1) val = parseFloat(rangeMax.value) - 1;
         rangeMin.value = val;
         this.value = Math.round(val);
         updateSliderFill();
@@ -94,8 +100,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (inputMax) {
       inputMax.addEventListener('change', function () {
         let val = parseFloat(this.value) || 100;
-        if (val > 100) val = 100;
-        if (val < parseFloat(rangeMin.value) + 2) val = parseFloat(rangeMin.value) + 2;
+        if (val > parseFloat(rangeMax.max)) val = parseFloat(rangeMax.max);
+        if (val < parseFloat(rangeMin.value) + 1) val = parseFloat(rangeMin.value) + 1;
         rangeMax.value = val;
         this.value = Math.round(val);
         updateSliderFill();
@@ -105,63 +111,162 @@ document.addEventListener('DOMContentLoaded', function () {
     updateSliderFill();
   }
 
-  // Apply Price Filter Button
+  /* ==========================================================================
+     3. MASTER FILTER ENGINE
+     ========================================================================== */
+  const productCards = Array.from(document.querySelectorAll('.category-product-card'));
+  const noProductsBox = document.getElementById('noProductsFoundBox');
+  const visibleCountText = document.getElementById('visibleCountText');
+  let activeQuickFilter = 'all';
+
+  function applyAllFilters() {
+    // 1. Get selected brands
+    const checkedBrandBoxes = Array.from(document.querySelectorAll('.brand-filter-checkbox:checked'));
+    const selectedBrands = checkedBrandBoxes.map(cb => (cb.dataset.brandSlug || cb.dataset.brand || '').toLowerCase());
+
+    // 2. Get price limits
+    const curMinPrice = rangeMin ? parseFloat(rangeMin.value) : 0;
+    const curMaxPrice = rangeMax ? parseFloat(rangeMax.value) : 999999;
+
+    // 3. Get selected puff ranges
+    const checkedPuffBoxes = Array.from(document.querySelectorAll('.puff-filter-checkbox:checked'));
+    const puffRanges = checkedPuffBoxes.map(cb => ({
+      min: parseInt(cb.dataset.minPuffs, 10) || 0,
+      max: parseInt(cb.dataset.maxPuffs, 10) || 999999
+    }));
+
+    // 4. Get selected nicotine strengths
+    const checkedNicBoxes = Array.from(document.querySelectorAll('.nic-filter-checkbox:checked'));
+    const selectedNics = checkedNicBoxes.map(cb => parseInt(cb.dataset.nic, 10));
+
+    // 5. In stock only
+    const inStockCheckbox = document.getElementById('inStockCheckbox');
+    const requireInStock = inStockCheckbox ? inStockCheckbox.checked : false;
+
+    // Evaluate each card
+    productCards.forEach(function (card) {
+      let isVisible = true;
+
+      // Quick pill filter
+      if (activeQuickFilter && activeQuickFilter !== 'all') {
+        const cardCat = card.dataset.category || '';
+        if (activeQuickFilter === 'zero-nic') {
+          if (cardCat !== 'zero-nic' && parseInt(card.dataset.nicotine, 10) !== 0) isVisible = false;
+        } else if (activeQuickFilter === 'bestseller') {
+          if (cardCat !== 'bestseller') isVisible = false;
+        } else {
+          if (cardCat !== activeQuickFilter) isVisible = false;
+        }
+      }
+
+      // Brand filter
+      if (isVisible && selectedBrands.length > 0) {
+        const cardBrand = (card.dataset.brand || '').toLowerCase();
+        const cardBrandSlug = (card.dataset.brandSlug || '').toLowerCase();
+        const matchesBrand = selectedBrands.some(b => b === cardBrand || b === cardBrandSlug);
+        if (!matchesBrand) isVisible = false;
+      }
+
+      // Price filter
+      if (isVisible) {
+        const price = parseFloat(card.dataset.price) || 0;
+        if (price < curMinPrice || price > curMaxPrice) {
+          isVisible = false;
+        }
+      }
+
+      // Puff range filter
+      if (isVisible && puffRanges.length > 0) {
+        const puffs = parseInt(card.dataset.puffs, 10) || 0;
+        const matchesPuff = puffRanges.some(r => puffs >= r.min && puffs <= r.max);
+        if (!matchesPuff) isVisible = false;
+      }
+
+      // Nicotine strength filter
+      if (isVisible && selectedNics.length > 0) {
+        const nic = parseInt(card.dataset.nicotine, 10);
+        const matchesNic = selectedNics.includes(nic);
+        if (!matchesNic) isVisible = false;
+      }
+
+      // In stock filter
+      if (isVisible && requireInStock) {
+        if (card.dataset.instock !== 'true') isVisible = false;
+      }
+
+      card.dataset.filteredOut = isVisible ? 'false' : 'true';
+    });
+
+    currentPage = 1;
+    renderPagination();
+  }
+
+  // Price Apply Button
   if (btnApplyPrice) {
     btnApplyPrice.addEventListener('click', function () {
-      const min = parseFloat(inputMin ? inputMin.value : 0) || 0;
-      const max = parseFloat(inputMax ? inputMax.value : 100) || 100;
-
-      const productCards = document.querySelectorAll('.category-product-card');
-      productCards.forEach(function (card) {
-        const price = parseFloat(card.dataset.price) || 0;
-        if (price >= min && price <= max) {
-          card.dataset.priceFiltered = 'true';
-        } else {
-          card.dataset.priceFiltered = 'false';
-        }
-      });
-
-      currentPage = 1;
-      renderPagination();
-
-      const originalText = btnApplyPrice.textContent;
-      btnApplyPrice.textContent = 'Filtered!';
-      setTimeout(function () {
-        btnApplyPrice.textContent = originalText;
-      }, 1000);
+      applyAllFilters();
+      const origText = btnApplyPrice.textContent;
+      btnApplyPrice.textContent = 'Applied ✓';
+      setTimeout(() => { btnApplyPrice.textContent = origText; }, 900);
     });
   }
 
-  /* ==========================================================================
-     3. QUICK FILTER PILLS
-     ========================================================================== */
-  const quickPillBtns = document.querySelectorAll('.quick-pill-btn');
+  // Brand checkboxes
+  document.querySelectorAll('.brand-filter-checkbox').forEach(cb => {
+    cb.addEventListener('change', applyAllFilters);
+  });
 
-  quickPillBtns.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      quickPillBtns.forEach(function (b) { b.classList.remove('active'); });
+  // Puff checkboxes
+  document.querySelectorAll('.puff-filter-checkbox').forEach(cb => {
+    cb.addEventListener('change', applyAllFilters);
+  });
+
+  // Nicotine checkboxes
+  document.querySelectorAll('.nic-filter-checkbox').forEach(cb => {
+    cb.addEventListener('change', applyAllFilters);
+  });
+
+  // In Stock checkbox
+  const inStockCheckbox = document.getElementById('inStockCheckbox');
+  if (inStockCheckbox) {
+    inStockCheckbox.addEventListener('change', applyAllFilters);
+  }
+
+  // Quick Filter Pills
+  const quickPillBtns = document.querySelectorAll('.quick-pill-btn[data-filter]');
+  quickPillBtns.forEach(btn => {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      quickPillBtns.forEach(b => b.classList.remove('active'));
       this.classList.add('active');
-
-      const filterType = this.dataset.filter;
-      const productCards = document.querySelectorAll('.category-product-card');
-
-      productCards.forEach(function (card) {
-        if (!filterType || filterType === 'all') {
-          delete card.dataset.pillFiltered;
-        } else {
-          const cardCat = card.dataset.category;
-          if (cardCat && cardCat === filterType) {
-            delete card.dataset.pillFiltered;
-          } else {
-            card.dataset.pillFiltered = 'hide';
-          }
-        }
-      });
-
-      currentPage = 1;
-      renderPagination();
+      activeQuickFilter = this.dataset.filter || 'all';
+      applyAllFilters();
     });
   });
+
+  // Reset All Filters
+  const btnResetAll = document.getElementById('btnResetAllFilters');
+  if (btnResetAll) {
+    btnResetAll.addEventListener('click', function () {
+      document.querySelectorAll('.brand-filter-checkbox').forEach(cb => { cb.checked = false; });
+      document.querySelectorAll('.puff-filter-checkbox').forEach(cb => { cb.checked = false; });
+      document.querySelectorAll('.nic-filter-checkbox').forEach(cb => { cb.checked = false; });
+      if (inStockCheckbox) inStockCheckbox.checked = false;
+
+      if (rangeMin && rangeMax) {
+        rangeMin.value = rangeMin.min;
+        rangeMax.value = rangeMax.max;
+        updateSliderFill();
+      }
+
+      quickPillBtns.forEach(b => b.classList.remove('active'));
+      const allPill = document.querySelector('.quick-pill-btn[data-filter="all"]');
+      if (allPill) allPill.classList.add('active');
+      activeQuickFilter = 'all';
+
+      applyAllFilters();
+    });
+  }
 
   /* ==========================================================================
      4. GRID / LIST VIEW SWITCHER
@@ -175,17 +280,17 @@ document.addEventListener('DOMContentLoaded', function () {
       btnGridView.classList.add('active');
       btnListView.classList.remove('active');
       productGrid.classList.remove('list-view');
-      localStorage.setItem('vape_category_view', 'grid');
+      localStorage.setItem('vape_collection_view', 'grid');
     });
 
     btnListView.addEventListener('click', function () {
       btnListView.classList.add('active');
       btnGridView.classList.remove('active');
       productGrid.classList.add('list-view');
-      localStorage.setItem('vape_category_view', 'list');
+      localStorage.setItem('vape_collection_view', 'list');
     });
 
-    const savedView = localStorage.getItem('vape_category_view');
+    const savedView = localStorage.getItem('vape_collection_view');
     if (savedView === 'list') {
       btnListView.click();
     }
@@ -216,14 +321,19 @@ document.addEventListener('DOMContentLoaded', function () {
         const titleA = (a.querySelector('.card-product-title')?.textContent || '').trim().toLowerCase();
         const titleB = (b.querySelector('.card-product-title')?.textContent || '').trim().toLowerCase();
         return isAscending ? titleA.localeCompare(titleB) : titleB.localeCompare(titleA);
+      } else if (sortVal === 'newest') {
+        const idA = parseInt(a.dataset.id, 10) || 0;
+        const idB = parseInt(b.dataset.id, 10) || 0;
+        return isAscending ? idB - idA : idA - idB;
+      } else if (sortVal === 'bestseller') {
+        const isHotA = a.dataset.category === 'bestseller' ? 1 : 0;
+        const isHotB = b.dataset.category === 'bestseller' ? 1 : 0;
+        return isAscending ? isHotB - isHotA : isHotA - isHotB;
       }
       return 0;
     });
 
-    cards.forEach(function (card) {
-      productGrid.appendChild(card);
-    });
-
+    cards.forEach(card => productGrid.appendChild(card));
     renderPagination();
   }
 
@@ -259,17 +369,9 @@ document.addEventListener('DOMContentLoaded', function () {
     document.body.style.overflow = '';
   }
 
-  if (mobileTriggerBtn) {
-    mobileTriggerBtn.addEventListener('click', openMobileFilters);
-  }
-
-  if (mobileCloseBtn) {
-    mobileCloseBtn.addEventListener('click', closeMobileFilters);
-  }
-
-  if (filterBackdrop) {
-    filterBackdrop.addEventListener('click', closeMobileFilters);
-  }
+  if (mobileTriggerBtn) mobileTriggerBtn.addEventListener('click', openMobileFilters);
+  if (mobileCloseBtn) mobileCloseBtn.addEventListener('click', closeMobileFilters);
+  if (filterBackdrop) filterBackdrop.addEventListener('click', closeMobileFilters);
 
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && sidebarCol && sidebarCol.classList.contains('mobile-open')) {
@@ -278,7 +380,128 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   /* ==========================================================================
-     7. ADD TO CART BUTTON (Delegated on product grid)
+     7. PAGINATION & RESULTS COUNT
+     ========================================================================== */
+  let currentPage = 1;
+  const itemsPerPage = 16;
+  const paginationBar = document.getElementById('categoryPaginationBar');
+  const paginationPagesWrap = document.getElementById('paginationPagesWrap');
+  const paginationPrevBtn = document.getElementById('paginationPrevBtn');
+  const paginationNextBtn = document.getElementById('paginationNextBtn');
+  const paginationInfoText = document.getElementById('paginationInfoText');
+
+  function renderPagination() {
+    const allCards = Array.from(document.querySelectorAll('.category-product-card'));
+    const eligibleCards = allCards.filter(card => card.dataset.filteredOut !== 'true');
+
+    const totalEligible = eligibleCards.length;
+    const totalPages = Math.ceil(totalEligible / itemsPerPage) || 1;
+
+    if (visibleCountText) {
+      visibleCountText.textContent = totalEligible;
+    }
+
+    if (noProductsBox) {
+      noProductsBox.style.display = totalEligible === 0 ? 'block' : 'none';
+    }
+
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const endIdx = Math.min(startIdx + itemsPerPage, totalEligible);
+
+    // Hide all
+    allCards.forEach(card => { card.style.display = 'none'; });
+
+    // Show slice
+    eligibleCards.forEach((card, idx) => {
+      if (idx >= startIdx && idx < endIdx) {
+        card.style.display = '';
+      }
+    });
+
+    // Pagination info & buttons
+    if (paginationBar) {
+      paginationBar.style.display = totalEligible > itemsPerPage ? 'flex' : 'none';
+    }
+
+    if (paginationInfoText) {
+      paginationInfoText.textContent = totalEligible > 0 ? `Showing ${startIdx + 1}–${endIdx} of ${totalEligible}` : 'Showing 0 products';
+    }
+
+    if (paginationPagesWrap) {
+      paginationPagesWrap.innerHTML = '';
+      for (let p = 1; p <= totalPages; p++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.type = 'button';
+        pageBtn.className = 'pagination-page-btn' + (p === currentPage ? ' active' : '');
+        pageBtn.textContent = p;
+        pageBtn.dataset.page = p;
+        pageBtn.addEventListener('click', function () {
+          currentPage = p;
+          renderPagination();
+          scrollToProductGrid();
+        });
+        paginationPagesWrap.appendChild(pageBtn);
+      }
+    }
+
+    if (paginationPrevBtn) {
+      if (currentPage <= 1) {
+        paginationPrevBtn.classList.add('disabled');
+        paginationPrevBtn.disabled = true;
+      } else {
+        paginationPrevBtn.classList.remove('disabled');
+        paginationPrevBtn.disabled = false;
+      }
+    }
+
+    if (paginationNextBtn) {
+      if (currentPage >= totalPages) {
+        paginationNextBtn.classList.add('disabled');
+        paginationNextBtn.disabled = true;
+      } else {
+        paginationNextBtn.classList.remove('disabled');
+        paginationNextBtn.disabled = false;
+      }
+    }
+  }
+
+  if (paginationPrevBtn) {
+    paginationPrevBtn.addEventListener('click', function () {
+      if (currentPage > 1) {
+        currentPage--;
+        renderPagination();
+        scrollToProductGrid();
+      }
+    });
+  }
+
+  if (paginationNextBtn) {
+    paginationNextBtn.addEventListener('click', function () {
+      const eligibleCards = Array.from(document.querySelectorAll('.category-product-card')).filter(c => c.dataset.filteredOut !== 'true');
+      const totalPages = Math.ceil(eligibleCards.length / itemsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderPagination();
+        scrollToProductGrid();
+      }
+    });
+  }
+
+  function scrollToProductGrid() {
+    const grid = document.getElementById('categoryProductGrid');
+    if (grid) {
+      grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  // Initial render
+  renderPagination();
+
+  /* ==========================================================================
+     8. ADD TO CART INTERACTION
      ========================================================================== */
   if (productGrid) {
     productGrid.addEventListener('click', function (e) {
@@ -289,28 +512,21 @@ document.addEventListener('DOMContentLoaded', function () {
       e.stopPropagation();
 
       const card = btn.closest('.category-product-card');
-      if (card && window.NewVapeCart) {
-        const titleEl = card.querySelector('.card-product-title a, .card-product-title');
-        const priceEl = card.querySelector('.card-current-price');
-        const imgEl = card.querySelector('.card-product-img');
+      const title = btn.dataset.title || (card ? card.querySelector('.card-product-title a')?.textContent.trim() : 'Vape Device');
+      const price = parseFloat(btn.dataset.price) || 14.99;
+      const img = card ? card.querySelector('.card-product-img')?.getAttribute('src') : 'assets/images/no-image.svg';
+      const id = btn.dataset.id || title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-        const title = titleEl ? titleEl.textContent.trim() : 'Vape Device';
-        const priceStr = priceEl ? priceEl.textContent.replace(/[^0-9.]/g, '') : '14.99';
-        const price = parseFloat(priceStr) || 14.99;
-        const image = imgEl ? imgEl.getAttribute('src') : 'assets/images/vape-image.webp';
-        const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-
+      if (window.NewVapeCart) {
         window.NewVapeCart.add({
           id: id,
           title: title,
           price: price,
           quantity: 1,
           flavor: '',
-          image: image
+          image: img
         });
       }
-
-      if (btn.classList.contains('added')) return;
 
       const origText = btn.textContent;
       btn.classList.add('added');
@@ -323,210 +539,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  /* ==========================================================================
-     8. CATEGORY RADIO / CHECKBOX FILTER INTERACTION
-     ========================================================================== */
-  const categoryRadios = document.querySelectorAll('input[name="filterCategory"]');
-  categoryRadios.forEach(function (radio) {
-    radio.addEventListener('change', function () {
-      if (this.checked) {
-        const label = this.closest('.filter-option-label');
-        const catName = label ? label.querySelector('.option-name')?.textContent.trim() : '';
-
-        quickPillBtns.forEach(function (pill) {
-          if (pill.textContent.trim() === catName) {
-            pill.click();
-          }
-        });
-      }
-    });
-  });
-
-  /* ==========================================================================
-     9. PAGINATION (16 items per page, 20 total cards)
-     ========================================================================== */
-  let currentPage = 1;
-  let itemsPerPage = 16;
-  const paginationControls = document.getElementById('paginationControls');
-  const paginationRangeText = document.getElementById('paginationRangeText');
-  const paginationTotalText = document.getElementById('paginationTotalText');
-  const btnPagePrev = document.getElementById('btnPagePrev');
-  const btnPageNext = document.getElementById('btnPageNext');
-  const itemsPerPageSelect = document.getElementById('itemsPerPageSelect');
-
-  function renderPagination() {
-    const allCards = Array.from(document.querySelectorAll('.category-product-card'));
-    
-    // Filter cards eligible to display
-    const eligibleCards = allCards.filter(function (card) {
-      if (card.dataset.pillFiltered === 'hide') return false;
-      if (card.dataset.priceFiltered === 'false') return false;
-      return true;
-    });
-
-    const totalItems = eligibleCards.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-
-    if (currentPage > totalPages) currentPage = totalPages;
-    if (currentPage < 1) currentPage = 1;
-
-    const startIdx = (currentPage - 1) * itemsPerPage;
-    const endIdx = Math.min(startIdx + itemsPerPage, totalItems);
-
-    // Hide all cards first
-    allCards.forEach(function (card) {
-      card.style.display = 'none';
-    });
-
-    // Show only the slice of eligible cards for current page
-    eligibleCards.forEach(function (card, idx) {
-      if (idx >= startIdx && idx < endIdx) {
-        card.style.display = '';
-      }
-    });
-
-    // Update range text: "1 to 16 of 20"
-    if (paginationRangeText) {
-      paginationRangeText.textContent = totalItems > 0 ? `${startIdx + 1} to ${endIdx}` : '0';
-    }
-    if (paginationTotalText) {
-      paginationTotalText.textContent = totalItems;
-    }
-
-    // Update page buttons
-    const numButtons = paginationControls ? paginationControls.querySelectorAll('.pagination-num-btn') : [];
-    numButtons.forEach(function (btn) {
-      const pageNum = parseInt(btn.dataset.page, 10);
-      if (pageNum === currentPage) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
-    });
-
-    // Update Prev / Next buttons
-    if (btnPagePrev) {
-      if (currentPage <= 1) {
-        btnPagePrev.classList.add('disabled');
-      } else {
-        btnPagePrev.classList.remove('disabled');
-      }
-    }
-
-    if (btnPageNext) {
-      if (currentPage >= totalPages) {
-        btnPageNext.classList.add('disabled');
-      } else {
-        btnPageNext.classList.remove('disabled');
-      }
-    }
-  }
-
-  // Page numbers click
-  if (paginationControls) {
-    paginationControls.addEventListener('click', function (e) {
-      const numBtn = e.target.closest('.pagination-num-btn');
-      if (numBtn) {
-        const targetPage = parseInt(numBtn.dataset.page, 10);
-        if (targetPage && targetPage !== currentPage) {
-          currentPage = targetPage;
-          renderPagination();
-          scrollToProductGrid();
-        }
-      }
-    });
-  }
-
-  // Prev button click
-  if (btnPagePrev) {
-    btnPagePrev.addEventListener('click', function () {
-      if (currentPage > 1) {
-        currentPage--;
-        renderPagination();
-        scrollToProductGrid();
-      }
-    });
-  }
-
-  // Next button click
-  if (btnPageNext) {
-    btnPageNext.addEventListener('click', function () {
-      const allCards = document.querySelectorAll('.category-product-card');
-      const totalPages = Math.ceil(allCards.length / itemsPerPage);
-      if (currentPage < totalPages) {
-        currentPage++;
-        renderPagination();
-        scrollToProductGrid();
-      }
-    });
-  }
-
-  // Items per page select dropdown (Show 16 / 20 / 24)
-  if (itemsPerPageSelect) {
-    itemsPerPageSelect.addEventListener('change', function () {
-      itemsPerPage = parseInt(this.value, 10) || 16;
-      currentPage = 1;
-      renderPagination();
-      scrollToProductGrid();
-    });
-  }
-
-  function scrollToProductGrid() {
-    const grid = document.getElementById('categoryProductGrid');
-    if (grid) {
-      grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }
-
-  // Initialize pagination on load
-  renderPagination();
-
-  /* ==========================================================================
-     10. CATEGORY BOTTOM DESCRIPTION READ MORE / READ LESS TOGGLE
-     ========================================================================== */
-  const btnReadMoreToggle = document.getElementById('btnReadMoreToggle');
-  const bottomTextWrap = document.getElementById('categoryBottomTextWrap');
-
-  if (btnReadMoreToggle && bottomTextWrap) {
-    btnReadMoreToggle.addEventListener('click', function () {
-      const isExpanded = bottomTextWrap.classList.contains('expanded');
-      const label = this.querySelector('.btn-read-more-label');
-
-      if (isExpanded) {
-        bottomTextWrap.classList.remove('expanded');
-        this.classList.remove('expanded');
-        this.setAttribute('aria-expanded', 'false');
-        if (label) label.textContent = 'Read More';
-      } else {
-        bottomTextWrap.classList.add('expanded');
-        this.classList.add('expanded');
-        this.setAttribute('aria-expanded', 'true');
-        if (label) label.textContent = 'Read Less';
-      }
-    });
-  }
-
-  /* ==========================================================================
-     11. CATEGORY FAQS ACCORDION TOGGLE
-     ========================================================================== */
-  const faqQuestionBtns = document.querySelectorAll('.category-faq-question-btn');
-
-  faqQuestionBtns.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      const parentItem = this.closest('.category-faq-item');
-      if (!parentItem) return;
-
-      const isCurrentlyOpen = parentItem.classList.contains('open');
-
-      if (isCurrentlyOpen) {
-        parentItem.classList.remove('open');
-        this.setAttribute('aria-expanded', 'false');
-      } else {
-        parentItem.classList.add('open');
-        this.setAttribute('aria-expanded', 'true');
-      }
-    });
-  });
-
 });
-
