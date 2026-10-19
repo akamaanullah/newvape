@@ -9,9 +9,10 @@ $page_js    = 'home';
 include dirname(__DIR__) . '/includes/header.php';
 ?>
 
-<!-- ==========================================
-     HERO BANNER SECTION
-     ========================================== -->
+<?php 
+$activeSlides = array_filter($heroSlides ?? [], function($s) { return !empty($s['is_active']); });
+if (!empty($activeSlides)): 
+?>
 <!-- ==========================================
      HERO BANNER SECTION
      ========================================== -->
@@ -20,23 +21,13 @@ include dirname(__DIR__) . '/includes/header.php';
     <div class="hero-slider-wrapper" id="heroSliderWrapper">
       <div class="hero-slider-slides">
         <?php 
-        $activeSlides = array_filter($heroSlides ?? [], function($s) { return !empty($s['is_active']); });
-        if (empty($activeSlides)) {
-            $activeSlides = [
-                [
-                    'badge_text'  => 'NEW FLAVORS',
-                    'title'       => 'Every Flavor. In Stock.',
-                    'subtitle'    => 'The full Foger Switch Pro lineup is here.',
-                    'button_text' => 'Find Your Flavor',
-                    'button_url'  => 'category?b=foger',
-                    'image_url'   => 'assets/images/foger-switch-pro-new-pod-flavors-d-banner.webp',
-                ]
-            ];
-        }
         $slideIdx = 0;
         foreach ($activeSlides as $slide):
             $isFirst = ($slideIdx === 0);
-            $imgSrc = !empty($slide['image_url']) ? $slide['image_url'] : 'assets/images/foger-switch-pro-new-pod-flavors-d-banner.webp';
+            $imgSrc = !empty($slide['image_url']) ? $slide['image_url'] : 'assets/images/no-image.svg';
+            if (!preg_match('~^(https?://|//|#)~i', $imgSrc)) {
+                $imgSrc = url($imgSrc);
+            }
             $btnUrl = !empty($slide['button_url']) ? (preg_match('~^(https?://|//|#)~i', $slide['button_url']) ? $slide['button_url'] : url($slide['button_url'])) : url('category');
         ?>
         <div class="hero-banner-card hero-slide-item <?= $isFirst ? 'active' : '' ?>" data-slide="<?= $slideIdx ?>">
@@ -45,6 +36,7 @@ include dirname(__DIR__) . '/includes/header.php';
             src="<?= htmlspecialchars($imgSrc) ?>" 
             alt="<?= htmlspecialchars($slide['title']) ?>" 
             class="hero-banner-bg"
+            onerror="this.onerror=null;this.src='<?= url('assets/images/no-image.svg') ?>';"
           >
 
           <!-- Left Text & CTA Content -->
@@ -97,6 +89,7 @@ include dirname(__DIR__) . '/includes/header.php';
     </div>
   </div>
 </section>
+<?php endif; ?>
 
 <!-- ==========================================
      TRUST / FEATURES BAR SECTION
@@ -205,14 +198,14 @@ include dirname(__DIR__) . '/includes/header.php';
       <?php if (!empty($categories)): ?>
         <?php foreach ($categories as $cat): 
           $catUrl = url('category') . '?cat=' . urlencode($cat['slug']);
-          $imgUrl = !empty($cat['header_image_url']) ? $cat['header_image_url'] : 'assets/images/img-1.png';
+          $imgUrl = !empty($cat['header_image_url']) ? $cat['header_image_url'] : 'assets/images/no-image.svg';
           if (!preg_match('~^(https?://|//|#)~i', $imgUrl)) {
               $imgUrl = url($imgUrl);
           }
         ?>
           <a href="<?= htmlspecialchars($catUrl) ?>" class="category-card">
             <div class="category-card-media">
-              <img src="<?= htmlspecialchars($imgUrl) ?>" alt="<?= htmlspecialchars($cat['name']) ?>" class="category-card-img">
+              <img src="<?= htmlspecialchars($imgUrl) ?>" alt="<?= htmlspecialchars($cat['name']) ?>" class="category-card-img" onerror="this.onerror=null;this.src='<?= url('assets/images/no-image.svg') ?>';">
             </div>
             <div class="category-card-info">
               <h3 class="category-card-title"><?= htmlspecialchars($cat['name']) ?></h3>
@@ -250,14 +243,14 @@ include dirname(__DIR__) . '/includes/header.php';
               $bSlug = $b['slug'] ?? '';
               $bName = $b['name'] ?? '';
               $bDesc = $b['description'] ?? 'Official Verified Vendor';
-              $bLogo = !empty($b['logo_url']) ? $b['logo_url'] : 'assets/images/geek-bar.webp';
+              $bLogo = !empty($b['logo_url']) ? $b['logo_url'] : 'assets/images/no-image.svg';
               if (!preg_match('~^(https?://|//|#)~i', $bLogo)) {
                   $bLogo = url($bLogo);
               }
             ?>
             <a href="<?= url('category?b=' . urlencode($bSlug)) ?>" class="brand-item-card">
               <div class="brand-logo-wrap">
-                <img src="<?= htmlspecialchars($bLogo) ?>" alt="<?= htmlspecialchars($bName) ?>" class="brand-logo-img" onerror="this.src='<?= url('assets/images/geek-bar.webp') ?>';">
+                <img src="<?= htmlspecialchars($bLogo) ?>" alt="<?= htmlspecialchars($bName) ?>" class="brand-logo-img" onerror="this.onerror=null;this.src='<?= url('assets/images/no-image.svg') ?>';">
               </div>
               <div class="brand-item-info">
                 <h3 class="brand-item-name"><?= htmlspecialchars($bName) ?></h3>
@@ -483,11 +476,14 @@ if (!empty($activeTwins)):
     <div class="twin-banners-grid">
       
       <?php foreach ($activeTwins as $card): 
-        $cardImg = !empty($card['image_url']) ? $card['image_url'] : 'assets/images/twin-banner.webp';
+        $cardImg = !empty($card['image_url']) ? $card['image_url'] : 'assets/images/no-image.svg';
+        if (!preg_match('~^(https?://|//|#)~i', $cardImg)) {
+            $cardImg = url($cardImg);
+        }
         $cardBtnUrl = !empty($card['button_url']) ? (preg_match('~^(https?://|//|#)~i', $card['button_url']) ? $card['button_url'] : url($card['button_url'])) : url('category');
       ?>
       <div class="promo-banner-card">
-        <img src="<?= htmlspecialchars($cardImg) ?>" alt="<?= htmlspecialchars(strip_tags($card['title'])) ?>" class="promo-banner-bg">
+        <img src="<?= htmlspecialchars($cardImg) ?>" alt="<?= htmlspecialchars(strip_tags($card['title'])) ?>" class="promo-banner-bg" onerror="this.onerror=null;this.src='<?= url('assets/images/no-image.svg') ?>';">
         <div class="promo-banner-content">
           <h3 class="promo-banner-title"><?= $card['title'] ?></h3>
           <?php if (!empty($card['subtitle'])): ?>
@@ -933,7 +929,7 @@ if (!empty($activeTwins)):
         <?php foreach ($latestBlogs as $blog): 
           $blogSlug = !empty($blog['slug']) ? $blog['slug'] : $blog['id'];
           $blogUrl = url('blog-detail?slug=' . urlencode($blogSlug));
-          $blogImg = !empty($blog['featured_image_url']) ? $blog['featured_image_url'] : 'assets/images/blog-1.jpg';
+          $blogImg = !empty($blog['featured_image_url']) ? $blog['featured_image_url'] : 'assets/images/no-image.svg';
           if (!preg_match('~^(https?://|//|#)~i', $blogImg)) {
               $blogImg = url($blogImg);
           }

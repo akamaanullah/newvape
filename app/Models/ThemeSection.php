@@ -130,7 +130,7 @@ class ThemeSection extends Model
                 'subtitle'    => trim($s['subtitle'] ?? ''),
                 'button_text' => trim($s['button_text'] ?? 'Shop Now'),
                 'button_url'  => trim($s['button_url'] ?? 'category'),
-                'image_url'   => trim($s['image_url'] ?? 'assets/images/foger-switch-pro-new-pod-flavors-d-banner.webp'),
+                'image_url'   => trim($s['image_url'] ?? ''),
                 'is_active'   => isset($s['is_active']) ? (int)$s['is_active'] : 1
             ];
         }
@@ -193,7 +193,7 @@ class ThemeSection extends Model
                 'subtitle'    => trim($b['subtitle'] ?? ''),
                 'button_text' => trim($b['button_text'] ?? 'Shop Now'),
                 'button_url'  => trim($b['button_url'] ?? 'category'),
-                'image_url'   => trim($b['image_url'] ?? 'assets/images/twin-banner.webp'),
+                'image_url'   => trim($b['image_url'] ?? ''),
                 'is_active'   => isset($b['is_active']) ? (int)$b['is_active'] : 1
             ];
         }

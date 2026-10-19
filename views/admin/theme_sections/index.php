@@ -604,14 +604,7 @@ input:checked + .toggle-slider:before {
 
                 <div class="admin-form-group" style="margin: 0;">
                   <label class="admin-form-label" style="font-weight: 600; font-size: 12px;">Banner Image Path</label>
-                  <input type="text" name="slides[<?= $idx ?>][image_url]" class="admin-form-input slide-img-input" value="<?= e($slide['image_url']) ?>" placeholder="e.g. assets/images/foger-switch-pro-new-pod-flavors-d-banner.webp">
-                  <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
-                    Presets: 
-                    <a href="#" class="preset-img-link" data-url="assets/images/foger-switch-pro-new-pod-flavors-d-banner.webp" style="color: #f97316;">Foger Banner</a> | 
-                    <a href="#" class="preset-img-link" data-url="assets/images/banner-1.webp" style="color: #f97316;">Banner 1</a> | 
-                    <a href="#" class="preset-img-link" data-url="assets/images/banner-2.webp" style="color: #f97316;">Banner 2</a> | 
-                    <a href="#" class="preset-img-link" data-url="assets/images/banner-3.webp" style="color: #f97316;">Banner 3</a>
-                  </div>
+                  <input type="text" name="slides[<?= $idx ?>][image_url]" class="admin-form-input slide-img-input" value="<?= e($slide['image_url']) ?>" placeholder="e.g. assets/images/hero-banner.webp">
                 </div>
               </div>
 
@@ -619,7 +612,7 @@ input:checked + .toggle-slider:before {
               <div>
                 <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.05em;">Live Preview</label>
                 <div class="theme-card-preview" style="min-height: 200px;">
-                  <img src="<?= e($slide['image_url']) ?>" alt="Banner Preview" class="theme-card-preview-bg slide-preview-img" onerror="this.src='assets/images/foger-switch-pro-new-pod-flavors-d-banner.webp'">
+                  <img src="<?= e($slide['image_url']) ?>" alt="Banner Preview" class="theme-card-preview-bg slide-preview-img" onerror="this.onerror=null;this.src='assets/images/no-image.svg'">
                   <div class="theme-card-preview-overlay"></div>
                   <div class="theme-card-preview-content" style="padding: 18px;">
                     <div style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; background: rgba(249, 115, 22, 0.25); border: 1px solid rgba(249, 115, 22, 0.5); border-radius: 999px; color: #f97316; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">
@@ -810,7 +803,7 @@ input:checked + .toggle-slider:before {
             <!-- Mini Live Preview -->
             <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.05em;">Live Preview</label>
             <div style="position: relative; border-radius: 10px; overflow: hidden; min-height: 160px; background: #0f172a; margin-bottom: 16px; display: flex; align-items: center;">
-              <img src="<?= e($card['image_url']) ?>" alt="Card Preview" class="twin-preview-img" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;" onerror="this.src='assets/images/twin-banner.webp'">
+              <img src="<?= e($card['image_url']) ?>" alt="Card Preview" class="twin-preview-img" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='assets/images/no-image.svg'">
               <div style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10, 14, 20, 0.92) 0%, rgba(10, 14, 20, 0.65) 50%, rgba(10, 14, 20, 0.2) 100%); z-index: 2;"></div>
               <div style="position: relative; z-index: 3; padding: 16px; max-width: 280px;">
                 <h4 class="twin-preview-title" style="color: #fff; font-size: 14.5px; font-weight: 800; line-height: 1.25; margin: 0 0 5px 0;"><?= $card['title'] ?></h4>
@@ -849,13 +842,7 @@ input:checked + .toggle-slider:before {
 
               <div class="admin-form-group" style="margin: 0;">
                 <label class="admin-form-label" style="font-weight: 600; font-size: 12px;">Background Image URL</label>
-                <input type="text" name="banners[<?= $i ?>][image_url]" class="admin-form-input twin-img-input" value="<?= e($card['image_url']) ?>">
-                <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
-                  Presets: 
-                  <a href="#" class="preset-twin-link" data-url="assets/images/twin-banner.webp" style="color: #f97316;">Default Twin Banner</a> | 
-                  <a href="#" class="preset-twin-link" data-url="assets/images/banner-1.webp" style="color: #f97316;">Banner 1</a> | 
-                  <a href="#" class="preset-twin-link" data-url="assets/images/banner-2.webp" style="color: #f97316;">Banner 2</a>
-                </div>
+                <input type="text" name="banners[<?= $i ?>][image_url]" class="admin-form-input twin-img-input" value="<?= e($card['image_url']) ?>" placeholder="e.g. assets/images/promo-card.webp">
               </div>
             </div>
 
@@ -1080,18 +1067,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Presets
-    card.querySelectorAll('.preset-img-link').forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const url = link.getAttribute('data-url');
-        if (imgInput && previewImg) {
-          imgInput.value = url;
-          previewImg.src = url;
-        }
-      });
-    });
-
     // Remove slide
     const removeBtn = card.querySelector('.remove-slide-btn');
     if (removeBtn) {
@@ -1193,21 +1168,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <div class="admin-form-group" style="margin: 0;">
               <label class="admin-form-label" style="font-weight: 600; font-size: 12px;">Banner Image Path</label>
-              <input type="text" name="slides[${newIndex}][image_url]" class="admin-form-input slide-img-input" value="assets/images/banner-1.webp">
-              <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
-                Presets: 
-                <a href="#" class="preset-img-link" data-url="assets/images/foger-switch-pro-new-pod-flavors-d-banner.webp" style="color: #f97316;">Foger Banner</a> | 
-                <a href="#" class="preset-img-link" data-url="assets/images/banner-1.webp" style="color: #f97316;">Banner 1</a> | 
-                <a href="#" class="preset-img-link" data-url="assets/images/banner-2.webp" style="color: #f97316;">Banner 2</a> | 
-                <a href="#" class="preset-img-link" data-url="assets/images/banner-3.webp" style="color: #f97316;">Banner 3</a>
-              </div>
+              <input type="text" name="slides[${newIndex}][image_url]" class="admin-form-input slide-img-input" value="" placeholder="e.g. assets/images/hero-banner.webp">
             </div>
           </div>
 
           <div>
             <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.05em;">Live Preview</label>
             <div class="theme-card-preview" style="min-height: 200px;">
-              <img src="assets/images/banner-1.webp" alt="Banner Preview" class="theme-card-preview-bg slide-preview-img">
+              <img src="assets/images/no-image.svg" alt="Banner Preview" class="theme-card-preview-bg slide-preview-img" onerror="this.onerror=null;this.src='assets/images/no-image.svg'">
               <div class="theme-card-preview-overlay"></div>
               <div class="theme-card-preview-content" style="padding: 18px;">
                 <div style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; background: rgba(249, 115, 22, 0.25); border: 1px solid rgba(249, 115, 22, 0.5); border-radius: 999px; color: #f97316; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">
@@ -1303,17 +1271,6 @@ document.addEventListener('DOMContentLoaded', () => {
         previewImg.src = imgInput.value;
       });
     }
-
-    editor.querySelectorAll('.preset-twin-link').forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const url = link.getAttribute('data-url');
-        if (imgInput && previewImg) {
-          imgInput.value = url;
-          previewImg.src = url;
-        }
-      });
-    });
   });
 
   // 4. Trusted Store & SEO Content Single Rich Text Editor

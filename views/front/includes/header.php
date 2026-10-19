@@ -14,15 +14,7 @@ if (class_exists('\\App\\Models\\Menu')) {
 }
 
 // Fetch dynamic Header Announcement & Warning Bars
-$themeAnnouncements = class_exists('\\App\\Models\\ThemeSection') 
-    ? \App\Models\ThemeSection::getAnnouncementBars() 
-    : [
-        'fda_warning_active' => 1,
-        'fda_warning_text'   => 'WARNING: This product contains nicotine. Nicotine is an addictive chemical.',
-        'promo_bar_active'   => 1,
-        'promo_bar_text'     => 'Free shipping on orders over $150',
-        'promo_bar_link'     => ''
-    ];
+$themeAnnouncements = \App\Models\ThemeSection::getAnnouncementBars();
 
 // Helper to format storefront navigation links cleanly
 $formatNavUrl = function($link) {
