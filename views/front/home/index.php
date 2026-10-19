@@ -34,7 +34,7 @@ include dirname(__DIR__) . '/includes/header.php';
         
         <p class="hero-subtitle">The full Foger Switch Pro lineup is here.</p>
         
-        <a href="shop.php?brand=foger" class="hero-cta-btn">
+        <a href="<?= url('category?b=foger') ?>" class="hero-cta-btn">
           Find Your Flavor
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -430,7 +430,7 @@ include dirname(__DIR__) . '/includes/header.php';
         <div class="promo-banner-content">
           <h3 class="promo-banner-title">Foger Switch Pro &mdash; Up to 30,000 Puffs</h3>
           <p class="promo-banner-subtitle">Pod system with power bank &amp; OLED display.</p>
-          <a href="brand.php?b=foger" class="promo-banner-btn">
+          <a href="<?= url('category?b=foger') ?>" class="promo-banner-btn">
             Shop Foger Switch Pro
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
@@ -445,7 +445,7 @@ include dirname(__DIR__) . '/includes/header.php';
         <div class="promo-banner-content">
           <h3 class="promo-banner-title">Entire Adjust Lineup</h3>
           <p class="promo-banner-subtitle">Tune your cool. Tune your flavor. Only $11.99.</p>
-          <a href="brand.php?b=adjust" class="promo-banner-btn">
+          <a href="<?= url('category?b=adjust') ?>" class="promo-banner-btn">
             Shop Adjust Series
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
@@ -860,7 +860,7 @@ include dirname(__DIR__) . '/includes/header.php';
         <p class="products-section-subtitle">Expert guides, reviews, and the latest vaping news.</p>
       </div>
       <div class="products-header-right">
-        <a href="javascript:void(0)" class="view-all-link">
+        <a href="<?= url('blog') ?>" class="view-all-link">
           Read All Posts
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 18 15 12 9 6"></polyline>
@@ -886,7 +886,7 @@ include dirname(__DIR__) . '/includes/header.php';
       
       <!-- Blog Card 1 -->
       <article class="blog-card">
-        <a href="javascript:void(0)" class="blog-card-thumb-link">
+        <a href="<?= url('blog-detail') ?>" class="blog-card-thumb-link">
           <div class="blog-card-media">
             <img src="assets/images/blog-1.jpg" alt="Can You Refill a Foger Vape? What to Do Instead" class="blog-card-img">
           </div>
@@ -894,7 +894,7 @@ include dirname(__DIR__) . '/includes/header.php';
         <div class="blog-card-content">
           <span class="blog-card-date">Sep 28, 2026</span>
           <h3 class="blog-card-title">
-            <a href="javascript:void(0)">Can You Refill a Foger Vape? What to Do Instead</a>
+            <a href="<?= url('blog-detail') ?>">Can You Refill a Foger Vape? What to Do Instead</a>
           </h3>
           <p class="blog-card-excerpt">Neither Foger device takes e-liquid from a bottle. Here's what actually happens when a Foger runs dry, why the Switch Pro is...</p>
         </div>
@@ -902,7 +902,7 @@ include dirname(__DIR__) . '/includes/header.php';
 
       <!-- Blog Card 2 -->
       <article class="blog-card">
-        <a href="javascript:void(0)" class="blog-card-thumb-link">
+        <a href="<?= url('blog-detail') ?>" class="blog-card-thumb-link">
           <div class="blog-card-media">
             <img src="assets/images/blog-2.jpg" alt="Foger Vape Guide: Every Device, Flavor and Feature Explained" class="blog-card-img">
           </div>
@@ -910,7 +910,7 @@ include dirname(__DIR__) . '/includes/header.php';
         <div class="blog-card-content">
           <span class="blog-card-date">Sep 25, 2026</span>
           <h3 class="blog-card-title">
-            <a href="javascript:void(0)">Foger Vape Guide: Every Device, Flavor and Feature Explained</a>
+            <a href="<?= url('blog-detail') ?>">Foger Vape Guide: Every Device, Flavor and Feature Explained</a>
           </h3>
           <p class="blog-card-excerpt">A complete guide to the Foger vape range. What the brand makes, how the sealed Bit 35K differs from the modular Switch...</p>
         </div>
@@ -918,7 +918,7 @@ include dirname(__DIR__) . '/includes/header.php';
 
       <!-- Blog Card 3 -->
       <article class="blog-card">
-        <a href="javascript:void(0)" class="blog-card-thumb-link">
+        <a href="<?= url('blog-detail') ?>" class="blog-card-thumb-link">
           <div class="blog-card-media">
             <img src="assets/images/blog-3.jpg" alt="How to Charge a JUUL: Dock, Charge Time and Fixes" class="blog-card-img">
           </div>
@@ -926,7 +926,7 @@ include dirname(__DIR__) . '/includes/header.php';
         <div class="blog-card-content">
           <span class="blog-card-date">Sep 24, 2026</span>
           <h3 class="blog-card-title">
-            <a href="javascript:void(0)">How to Charge a JUUL: Dock, Charge Time and Fixes</a>
+            <a href="<?= url('blog-detail') ?>">How to Charge a JUUL: Dock, Charge Time and Fixes</a>
           </h3>
           <p class="blog-card-excerpt">A JUUL Device charges on the USB Charging Dock it ships with, and a full charge takes about 1 hour. The battery is 200 mAh...</p>
         </div>
@@ -934,7 +934,7 @@ include dirname(__DIR__) . '/includes/header.php';
 
       <!-- Blog Card 4 -->
       <article class="blog-card">
-        <a href="javascript:void(0)" class="blog-card-thumb-link">
+        <a href="<?= url('blog-detail') ?>" class="blog-card-thumb-link">
           <div class="blog-card-media">
             <img src="assets/images/blog-4.jpg" alt="Best Foger Vape Flavors 2026: Top Picks Ranked" class="blog-card-img">
           </div>
@@ -942,7 +942,7 @@ include dirname(__DIR__) . '/includes/header.php';
         <div class="blog-card-content">
           <span class="blog-card-date">Sep 23, 2026</span>
           <h3 class="blog-card-title">
-            <a href="javascript:void(0)">Best Foger Vape Flavors 2026: Top Picks Ranked</a>
+            <a href="<?= url('blog-detail') ?>">Best Foger Vape Flavors 2026: Top Picks Ranked</a>
           </h3>
           <p class="blog-card-excerpt">We ranked the best Foger vape flavors across the Bit 35K &amp; Switch Pro 30K. Real customer reviews, taste profiles, excl...</p>
         </div>

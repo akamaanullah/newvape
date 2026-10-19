@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const title = titleEl ? titleEl.textContent.trim() : 'Vape Device';
         const priceStr = priceEl ? priceEl.textContent.replace(/[^0-9.]/g, '') : '19.99';
         const price = parseFloat(priceStr) || 19.99;
-        const image = imgEl ? imgEl.getAttribute('src') : 'assets/images/vape-image.webp';
+        const image = imgEl ? imgEl.getAttribute('src') : 'assets/images/no-image.svg';
         const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
         window.NewVapeCart.add({
