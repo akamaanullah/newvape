@@ -1,0 +1,37 @@
+<?php
+namespace App\Controllers;
+
+use App\Core\Controller;
+use App\Models\Product;
+use App\Models\Brand;
+use App\Models\Collection;
+
+class HomeController extends Controller
+{
+    public function index()
+    {
+        $products = Product::all();
+        $brands = Brand::active(12);
+        $categories = Collection::getMainCategories(4);
+        $newArrivals = Product::newArrivals(10);
+        $bestSellers = Product::bestSellers(10);
+        $disposableVapes = Product::disposables(16);
+        $vapeJuices = Product::vapeJuices(4);
+        $nicotinePouches = Product::nicotinePouches(4);
+        $hempThc = Product::hempThc(4);
+
+        $this->render('front.home.index', [
+            'page_title' => 'Online Vape Store | Every Flavor. In Stock.',
+            'page_js' => 'home',
+            'products' => $products,
+            'brands' => $brands,
+            'categories' => $categories,
+            'newArrivals' => $newArrivals,
+            'bestSellers' => $bestSellers,
+            'disposableVapes' => $disposableVapes,
+            'vapeJuices' => $vapeJuices,
+            'nicotinePouches' => $nicotinePouches,
+            'hempThc' => $hempThc
+        ]);
+    }
+}
