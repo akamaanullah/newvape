@@ -86,6 +86,23 @@ return [
     'admin/navigation/delete'  => [\App\Controllers\Admin\NavigationController::class, 'delete'],
     'admin/navigation/delete-item' => [\App\Controllers\Admin\NavigationController::class, 'deleteItem'],
     'admin/navigation/upload-banner' => [\App\Controllers\Admin\NavigationController::class, 'uploadBanner'],
+
+    // Admin Blogs CRUD
+    'admin/blogs'                  => [\App\Controllers\Admin\BlogController::class, 'index'],
+    'admin/blogs.php'              => [\App\Controllers\Admin\BlogController::class, 'index'],
+    'admin/blogs/create'           => [\App\Controllers\Admin\BlogController::class, 'create'],
+    'admin/blogs/add'              => [\App\Controllers\Admin\BlogController::class, 'create'],
+    'admin/add-blog'               => [\App\Controllers\Admin\BlogController::class, 'create'],
+    'admin/blogs/store'            => [\App\Controllers\Admin\BlogController::class, 'store'],
+    'admin/blogs/edit'             => [\App\Controllers\Admin\BlogController::class, 'edit'],
+    'admin/edit-blog'              => [\App\Controllers\Admin\BlogController::class, 'edit'],
+    'admin/blogs/update'           => [\App\Controllers\Admin\BlogController::class, 'update'],
+    'admin/blogs/delete'           => [\App\Controllers\Admin\BlogController::class, 'delete'],
+
+    // Admin Blog Categories CRUD
+    'admin/blog-categories'        => [\App\Controllers\Admin\BlogController::class, 'categories'],
+    'admin/blog-categories.php'    => [\App\Controllers\Admin\BlogController::class, 'categories'],
+    'admin/blog-categories/store'  => [\App\Controllers\Admin\BlogController::class, 'storeCategory'],
+    'admin/blog-categories/update' => [\App\Controllers\Admin\BlogController::class, 'updateCategory'],
+    'admin/blog-categories/delete' => [\App\Controllers\Admin\BlogController::class, 'deleteCategory'],
 ];
-
-

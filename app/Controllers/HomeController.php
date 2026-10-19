@@ -5,6 +5,7 @@ use App\Core\Controller;
 use App\Models\Product;
 use App\Models\Brand;
 use App\Models\Collection;
+use App\Models\BlogPost;
 
 class HomeController extends Controller
 {
@@ -19,6 +20,7 @@ class HomeController extends Controller
         $vapeJuices = Product::vapeJuices(4);
         $nicotinePouches = Product::nicotinePouches(4);
         $hempThc = Product::hempThc(4);
+        $latestBlogs = BlogPost::latest(4);
 
         $this->render('front.home.index', [
             'page_title' => 'Online Vape Store | Every Flavor. In Stock.',
@@ -31,7 +33,8 @@ class HomeController extends Controller
             'disposableVapes' => $disposableVapes,
             'vapeJuices' => $vapeJuices,
             'nicotinePouches' => $nicotinePouches,
-            'hempThc' => $hempThc
+            'hempThc' => $hempThc,
+            'latestBlogs' => $latestBlogs
         ]);
     }
 }

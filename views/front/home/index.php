@@ -883,71 +883,34 @@ include dirname(__DIR__) . '/includes/header.php';
 
     <!-- Blog Cards Grid / Slider Track -->
     <div class="blog-cards-grid">
-      
-      <!-- Blog Card 1 -->
-      <article class="blog-card">
-        <a href="<?= url('blog-detail') ?>" class="blog-card-thumb-link">
-          <div class="blog-card-media">
-            <img src="assets/images/blog-1.jpg" alt="Can You Refill a Foger Vape? What to Do Instead" class="blog-card-img">
-          </div>
-        </a>
-        <div class="blog-card-content">
-          <span class="blog-card-date">Sep 28, 2026</span>
-          <h3 class="blog-card-title">
-            <a href="<?= url('blog-detail') ?>">Can You Refill a Foger Vape? What to Do Instead</a>
-          </h3>
-          <p class="blog-card-excerpt">Neither Foger device takes e-liquid from a bottle. Here's what actually happens when a Foger runs dry, why the Switch Pro is...</p>
-        </div>
-      </article>
-
-      <!-- Blog Card 2 -->
-      <article class="blog-card">
-        <a href="<?= url('blog-detail') ?>" class="blog-card-thumb-link">
-          <div class="blog-card-media">
-            <img src="assets/images/blog-2.jpg" alt="Foger Vape Guide: Every Device, Flavor and Feature Explained" class="blog-card-img">
-          </div>
-        </a>
-        <div class="blog-card-content">
-          <span class="blog-card-date">Sep 25, 2026</span>
-          <h3 class="blog-card-title">
-            <a href="<?= url('blog-detail') ?>">Foger Vape Guide: Every Device, Flavor and Feature Explained</a>
-          </h3>
-          <p class="blog-card-excerpt">A complete guide to the Foger vape range. What the brand makes, how the sealed Bit 35K differs from the modular Switch...</p>
-        </div>
-      </article>
-
-      <!-- Blog Card 3 -->
-      <article class="blog-card">
-        <a href="<?= url('blog-detail') ?>" class="blog-card-thumb-link">
-          <div class="blog-card-media">
-            <img src="assets/images/blog-3.jpg" alt="How to Charge a JUUL: Dock, Charge Time and Fixes" class="blog-card-img">
-          </div>
-        </a>
-        <div class="blog-card-content">
-          <span class="blog-card-date">Sep 24, 2026</span>
-          <h3 class="blog-card-title">
-            <a href="<?= url('blog-detail') ?>">How to Charge a JUUL: Dock, Charge Time and Fixes</a>
-          </h3>
-          <p class="blog-card-excerpt">A JUUL Device charges on the USB Charging Dock it ships with, and a full charge takes about 1 hour. The battery is 200 mAh...</p>
-        </div>
-      </article>
-
-      <!-- Blog Card 4 -->
-      <article class="blog-card">
-        <a href="<?= url('blog-detail') ?>" class="blog-card-thumb-link">
-          <div class="blog-card-media">
-            <img src="assets/images/blog-4.jpg" alt="Best Foger Vape Flavors 2026: Top Picks Ranked" class="blog-card-img">
-          </div>
-        </a>
-        <div class="blog-card-content">
-          <span class="blog-card-date">Sep 23, 2026</span>
-          <h3 class="blog-card-title">
-            <a href="<?= url('blog-detail') ?>">Best Foger Vape Flavors 2026: Top Picks Ranked</a>
-          </h3>
-          <p class="blog-card-excerpt">We ranked the best Foger vape flavors across the Bit 35K &amp; Switch Pro 30K. Real customer reviews, taste profiles, excl...</p>
-        </div>
-      </article>
-
+      <?php $latestBlogs = $latestBlogs ?? []; ?>
+      <?php if (!empty($latestBlogs)): ?>
+        <?php foreach ($latestBlogs as $blog): 
+          $blogSlug = !empty($blog['slug']) ? $blog['slug'] : $blog['id'];
+          $blogUrl = url('blog-detail?slug=' . urlencode($blogSlug));
+          $blogImg = !empty($blog['featured_image_url']) ? $blog['featured_image_url'] : 'assets/images/blog-1.jpg';
+          if (!preg_match('~^(https?://|//|#)~i', $blogImg)) {
+              $blogImg = url($blogImg);
+          }
+          $blogDate = !empty($blog['published_at']) ? date('M d, Y', strtotime($blog['published_at'])) : date('M d, Y');
+          $blogCat = !empty($blog['category_name']) ? $blog['category_name'] : 'Guide';
+        ?>
+          <article class="blog-card">
+            <a href="<?= htmlspecialchars($blogUrl) ?>" class="blog-card-thumb-link">
+              <div class="blog-card-media">
+                <img src="<?= htmlspecialchars($blogImg) ?>" alt="<?= htmlspecialchars($blog['title']) ?>" class="blog-card-img" onerror="this.onerror=null;this.src='<?= url('assets/images/no-image.svg') ?>';">
+              </div>
+            </a>
+            <div class="blog-card-content">
+              <span class="blog-card-date"><?= htmlspecialchars($blogDate) ?></span>
+              <h3 class="blog-card-title">
+                <a href="<?= htmlspecialchars($blogUrl) ?>"><?= htmlspecialchars($blog['title']) ?></a>
+              </h3>
+              <p class="blog-card-excerpt"><?= htmlspecialchars(mb_strimwidth($blog['excerpt'] ?? '', 0, 125, '...')) ?></p>
+            </div>
+          </article>
+        <?php endforeach; ?>
+      <?php endif; ?>
     </div>
 
   </div>
