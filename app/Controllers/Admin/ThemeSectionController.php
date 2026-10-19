@@ -97,14 +97,9 @@ class ThemeSectionController extends AdminController
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
-                'is_active'       => isset($_POST['is_active']) ? 1 : 0,
-                'title'           => $_POST['title'] ?? '',
-                'paragraph_1'     => $_POST['paragraph_1'] ?? '',
-                'paragraph_2'     => $_POST['paragraph_2'] ?? '',
-                'paragraph_3'     => $_POST['paragraph_3'] ?? '',
-                'paragraph_4'     => $_POST['paragraph_4'] ?? '',
-                'disclaimer_text' => $_POST['disclaimer_text'] ?? '',
-                'compliance_text' => $_POST['compliance_text'] ?? ''
+                'is_active' => isset($_POST['is_active']) ? 1 : 0,
+                'title'     => $_POST['title'] ?? '',
+                'content'   => $_POST['content'] ?? ''
             ];
 
             if (ThemeSection::saveSeoContent($data)) {

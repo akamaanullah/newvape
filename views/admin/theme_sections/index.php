@@ -308,6 +308,60 @@ input:checked + .toggle-slider:before {
   justify-content: space-between;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
 }
+
+/* Rich Text Toolbar & Editor */
+.rich-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+.rich-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+.rich-btn:active {
+  transform: scale(0.97);
+}
+#richEditorVisual:focus {
+  outline: 2px solid rgba(249, 115, 22, 0.2);
+}
+#richEditorVisual p {
+  margin: 0 0 14px 0;
+}
+#richEditorVisual p.seo-content-disclaimer {
+  font-size: 12px;
+  color: #9f1239;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-top: 14px;
+}
+#richEditorVisual p.seo-content-compliance {
+  font-size: 12px;
+  font-weight: 600;
+  color: #065f46;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+#richEditorVisual a {
+  color: #f97316;
+  text-decoration: underline;
+}
 </style>
 
 <!-- Title & Action Bar -->
@@ -844,7 +898,7 @@ input:checked + .toggle-slider:before {
               </svg>
               <span>Your Trusted Online Vape Store (SEO &amp; Rich Content)</span>
             </h2>
-            <p>Manage the high-authority homepage SEO text, compliance disclaimers, and trust statement paragraphs.</p>
+            <p>Manage the high-authority homepage SEO text, compliance disclaimers, and trust statement in a single rich text editor.</p>
           </div>
           <label class="toggle-switch-wrapper">
             <span style="font-size: 13px; font-weight: 600; color: #475569;">Show Section:</span>
@@ -861,87 +915,79 @@ input:checked + .toggle-slider:before {
           <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em;">Live Storefront Visual Preview</label>
           <div id="seoPreviewBox" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: opacity 0.2s ease; <?= empty($seoContent['is_active']) ? 'opacity: 0.4;' : '' ?>">
             <h3 id="seoPreviewHeading" style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0 0 16px 0; border-bottom: 2px solid #ffeedb; padding-bottom: 8px;"><?= e($seoContent['title'] ?? 'Your Trusted Online Vape Store') ?></h3>
-            <div id="seoPreviewBody" style="font-size: 13.5px; color: #475569; line-height: 1.6; display: flex; flex-direction: column; gap: 12px;">
-              <p id="prevP1" style="margin: 0;"><?= $seoContent['paragraph_1'] ?></p>
-              <p id="prevP2" style="margin: 0;"><?= $seoContent['paragraph_2'] ?></p>
-              <p id="prevP3" style="margin: 0;"><?= $seoContent['paragraph_3'] ?></p>
-              <p id="prevP4" style="margin: 0;"><?= $seoContent['paragraph_4'] ?></p>
-              <p id="prevDisc" style="font-size: 12px; color: #94a3b8; font-style: italic; border-top: 1px dashed #e2e8f0; padding-top: 12px; margin: 0;"><?= e($seoContent['disclaimer_text']) ?></p>
-              <p id="prevComp" style="font-size: 12px; font-weight: 600; color: #059669; margin: 0;"><?= e($seoContent['compliance_text']) ?></p>
+            <div id="seoPreviewBody" style="font-size: 13.5px; color: #475569; line-height: 1.6;">
+              <?= $seoContent['content'] ?? '' ?>
             </div>
           </div>
         </div>
 
         <!-- Section Title Field -->
-        <div class="admin-form-group" style="margin-bottom: 20px;">
+        <div class="admin-form-group" style="margin-bottom: 22px;">
           <label class="admin-form-label" style="font-weight: 700; font-size: 13px;">Section Main Headline <span style="color: #ef4444;">*</span></label>
-          <input type="text" name="title" id="seoTitleInput" class="admin-form-input" style="font-size: 15px; font-weight: 600;" value="<?= e($seoContent['title']) ?>" placeholder="Your Trusted Online Vape Store" required>
+          <input type="text" name="title" id="seoTitleInput" class="admin-form-input" style="font-size: 15px; font-weight: 600;" value="<?= e($seoContent['title'] ?? 'Your Trusted Online Vape Store') ?>" placeholder="Your Trusted Online Vape Store" required>
         </div>
 
-        <!-- Paragraphs Form Grid -->
-        <div style="display: flex; flex-direction: column; gap: 18px;">
-          
-          <!-- Paragraph 1 -->
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <label class="admin-form-label" style="font-weight: 700; font-size: 13px; margin: 0; color: #0f172a;">
-                Paragraph 1: Store Intro &amp; Authenticity
-              </label>
-              <span style="font-size: 11px; color: #64748b; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">HTML Supported</span>
-            </div>
-            <textarea name="paragraph_1" id="p1Input" class="admin-form-input" rows="3"><?= e($seoContent['paragraph_1']) ?></textarea>
-          </div>
-
-          <!-- Paragraph 2 -->
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <label class="admin-form-label" style="font-weight: 700; font-size: 13px; margin: 0; color: #0f172a;">
-                Paragraph 2: Pricing &amp; Price Match Guarantee
-              </label>
-              <span style="font-size: 11px; color: #64748b; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">HTML Supported</span>
-            </div>
-            <textarea name="paragraph_2" id="p2Input" class="admin-form-input" rows="3"><?= e($seoContent['paragraph_2']) ?></textarea>
-          </div>
-
-          <!-- Paragraph 3 -->
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <label class="admin-form-label" style="font-weight: 700; font-size: 13px; margin: 0; color: #0f172a;">
-                Paragraph 3: High-Puff Disposables &amp; Cannabinoids Lineup
-              </label>
-              <span style="font-size: 11px; color: #64748b; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">HTML Supported</span>
-            </div>
-            <textarea name="paragraph_3" id="p3Input" class="admin-form-input" rows="3"><?= e($seoContent['paragraph_3']) ?></textarea>
-          </div>
-
-          <!-- Paragraph 4 -->
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <label class="admin-form-label" style="font-weight: 700; font-size: 13px; margin: 0; color: #0f172a;">
-                Paragraph 4: Why Shop With Us (Reviews &amp; Shipping)
-              </label>
-              <span style="font-size: 11px; color: #64748b; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">HTML Supported</span>
-            </div>
-            <textarea name="paragraph_4" id="p4Input" class="admin-form-input" rows="3"><?= e($seoContent['paragraph_4']) ?></textarea>
-          </div>
-
-          <!-- Legal & Compliance Grid -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-            <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 16px;">
-              <label class="admin-form-label" style="font-weight: 700; font-size: 12.5px; color: #9f1239; margin-bottom: 6px;">
-                FDA Age &amp; Health Disclaimer
-              </label>
-              <textarea name="disclaimer_text" id="discInput" class="admin-form-input" rows="3"><?= e($seoContent['disclaimer_text']) ?></textarea>
-            </div>
-
-            <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; padding: 16px;">
-              <label class="admin-form-label" style="font-weight: 700; font-size: 12.5px; color: #065f46; margin-bottom: 6px;">
-                PACT Act &amp; Compliance Statement
-              </label>
-              <textarea name="compliance_text" id="compInput" class="admin-form-input" rows="3"><?= e($seoContent['compliance_text']) ?></textarea>
+        <!-- Single Unified Rich Text Editor -->
+        <div class="admin-form-group" style="margin-bottom: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label class="admin-form-label" style="font-weight: 700; font-size: 13px; margin: 0; color: #0f172a;">
+              Content Body (Rich Text Editor)
+            </label>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 11.5px; color: #64748b;">Supports Bold, Italic, Headings, Links &amp; Lists</span>
+              <button type="button" id="toggleCodeViewBtn" class="btn-admin btn-admin-secondary" style="padding: 4px 10px; font-size: 11px; height: auto; display: inline-flex; align-items: center; gap: 5px;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                <span id="codeViewBtnText">HTML View</span>
+              </button>
             </div>
           </div>
 
+          <!-- Rich Text Container -->
+          <div class="rich-editor-wrapper" style="border: 1px solid #cbd5e1; border-radius: 10px; overflow: hidden; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <!-- Toolbar -->
+            <div class="rich-editor-toolbar" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+              <button type="button" class="rich-btn" data-cmd="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+              <button type="button" class="rich-btn" data-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+              <button type="button" class="rich-btn" data-cmd="underline" title="Underline (Ctrl+U)"><u>U</u></button>
+              <span style="width: 1px; height: 18px; background: #cbd5e1; margin: 0 2px;"></span>
+              
+              <button type="button" class="rich-btn" data-cmd="formatBlock" data-val="h2" title="Heading 2"><b>H2</b></button>
+              <button type="button" class="rich-btn" data-cmd="formatBlock" data-val="h3" title="Heading 3"><b>H3</b></button>
+              <button type="button" class="rich-btn" data-cmd="formatBlock" data-val="p" title="Normal Paragraph">¶ P</button>
+              <span style="width: 1px; height: 18px; background: #cbd5e1; margin: 0 2px;"></span>
+
+              <button type="button" class="rich-btn" data-cmd="insertUnorderedList" title="Bullet List">• List</button>
+              <button type="button" class="rich-btn" data-cmd="insertOrderedList" title="Numbered List">1. List</button>
+              <span style="width: 1px; height: 18px; background: #cbd5e1; margin: 0 2px;"></span>
+
+              <button type="button" class="rich-btn" id="insertLinkBtn" title="Insert Link">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                <span>Link</span>
+              </button>
+              <button type="button" class="rich-btn" data-cmd="unlink" title="Remove Link">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.84 12.25l1.72-1.71a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M5.16 11.75l-1.72 1.71a5 5 0 0 0 7.07 7.07l1.72-1.71"></path><line x1="2" y1="2" x2="22" y2="22"></line></svg>
+              </button>
+              <span style="width: 1px; height: 18px; background: #cbd5e1; margin: 0 2px;"></span>
+
+              <button type="button" class="rich-btn" id="insertDisclaimerBtn" title="Insert Disclaimer Notice" style="color: #9f1239; background: #fff1f2; border-color: #fecdd3;">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <span>Disclaimer Box</span>
+              </button>
+              <button type="button" class="rich-btn" id="insertComplianceBtn" title="Insert Compliance Notice" style="color: #065f46; background: #ecfdf5; border-color: #a7f3d0;">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span>Compliance Box</span>
+              </button>
+            </div>
+
+            <!-- Visual Contenteditable Area -->
+            <div id="richEditorVisual" contenteditable="true" style="min-height: 280px; max-height: 520px; overflow-y: auto; padding: 20px; font-size: 14.5px; line-height: 1.65; color: #334155; outline: none; background: #ffffff;">
+              <?= $seoContent['content'] ?? '' ?>
+            </div>
+
+            <!-- HTML Source Code Textarea (hidden by default) -->
+            <textarea name="content" id="seoContentTextarea" class="admin-form-input" style="display: none; min-height: 280px; max-height: 520px; font-family: monospace; font-size: 13px; line-height: 1.6; border: none; border-radius: 0; padding: 20px; outline: none; background: #0f172a; color: #f8fafc; resize: vertical;"><?= htmlspecialchars($seoContent['content'] ?? '') ?></textarea>
+          </div>
+          <small style="color: #64748b; font-size: 12px; margin-top: 6px; display: block;">You can edit visually using the formatting toolbar, or click <strong>HTML View</strong> to edit tags directly.</small>
         </div>
 
       </div>
@@ -1270,25 +1316,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 4. Trusted Store & SEO Content Realtime Feedback
+  // 4. Trusted Store & SEO Content Single Rich Text Editor
   const seoToggle = document.getElementById('seoActiveToggle');
   const seoBox = document.getElementById('seoPreviewBox');
   const seoTitleInput = document.getElementById('seoTitleInput');
   const seoPreviewHeading = document.getElementById('seoPreviewHeading');
+  const seoPreviewBody = document.getElementById('seoPreviewBody');
 
-  const p1Input = document.getElementById('p1Input');
-  const p2Input = document.getElementById('p2Input');
-  const p3Input = document.getElementById('p3Input');
-  const p4Input = document.getElementById('p4Input');
-  const discInput = document.getElementById('discInput');
-  const compInput = document.getElementById('compInput');
+  const richEditorVisual = document.getElementById('richEditorVisual');
+  const seoContentTextarea = document.getElementById('seoContentTextarea');
+  const toggleCodeViewBtn = document.getElementById('toggleCodeViewBtn');
+  const codeViewBtnText = document.getElementById('codeViewBtnText');
+  let isCodeView = false;
 
-  const prevP1 = document.getElementById('prevP1');
-  const prevP2 = document.getElementById('prevP2');
-  const prevP3 = document.getElementById('prevP3');
-  const prevP4 = document.getElementById('prevP4');
-  const prevDisc = document.getElementById('prevDisc');
-  const prevComp = document.getElementById('prevComp');
+  const syncToPreview = () => {
+    const html = isCodeView ? (seoContentTextarea ? seoContentTextarea.value : '') : (richEditorVisual ? richEditorVisual.innerHTML : '');
+    if (seoPreviewBody) {
+      seoPreviewBody.innerHTML = html;
+    }
+  };
+
+  const syncInputs = () => {
+    if (!isCodeView && richEditorVisual && seoContentTextarea) {
+      seoContentTextarea.value = richEditorVisual.innerHTML;
+    }
+    syncToPreview();
+  };
 
   if (seoToggle && seoBox) {
     seoToggle.addEventListener('change', () => {
@@ -1302,23 +1355,116 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (p1Input && prevP1) {
-    p1Input.addEventListener('input', () => { prevP1.innerHTML = p1Input.value; });
+  if (richEditorVisual) {
+    richEditorVisual.addEventListener('input', syncInputs);
+    richEditorVisual.addEventListener('blur', syncInputs);
   }
-  if (p2Input && prevP2) {
-    p2Input.addEventListener('input', () => { prevP2.innerHTML = p2Input.value; });
+
+  if (seoContentTextarea) {
+    seoContentTextarea.addEventListener('input', () => {
+      if (isCodeView && richEditorVisual) {
+        richEditorVisual.innerHTML = seoContentTextarea.value;
+      }
+      syncToPreview();
+    });
   }
-  if (p3Input && prevP3) {
-    p3Input.addEventListener('input', () => { prevP3.innerHTML = p3Input.value; });
+
+  // Formatting Toolbar Buttons (Bold, Italic, Headings, Lists, etc.)
+  document.querySelectorAll('.rich-btn[data-cmd]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (isCodeView || !richEditorVisual) return;
+
+      const cmd = btn.getAttribute('data-cmd');
+      const val = btn.getAttribute('data-val') || null;
+
+      richEditorVisual.focus();
+      document.execCommand(cmd, false, val);
+      syncInputs();
+    });
+  });
+
+  // Insert Link
+  const insertLinkBtn = document.getElementById('insertLinkBtn');
+  if (insertLinkBtn && richEditorVisual) {
+    insertLinkBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (isCodeView) return;
+
+      const url = prompt('Enter destination URL (e.g. category?cat=disposables or https://...):', 'category');
+      if (url) {
+        richEditorVisual.focus();
+        document.execCommand('createLink', false, url);
+        syncInputs();
+      }
+    });
   }
-  if (p4Input && prevP4) {
-    p4Input.addEventListener('input', () => { prevP4.innerHTML = p4Input.value; });
+
+  // Insert Disclaimer Notice
+  const insertDisclaimerBtn = document.getElementById('insertDisclaimerBtn');
+  if (insertDisclaimerBtn && richEditorVisual) {
+    insertDisclaimerBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (isCodeView) return;
+
+      richEditorVisual.focus();
+      const selection = window.getSelection();
+      const selectedText = selection.toString() || 'All products on this site are intended for adults of legal smoking age only. Keep all products out of the reach of children and pets.';
+      const disclaimerHtml = `<p class="seo-content-disclaimer">${selectedText}</p>`;
+      document.execCommand('insertHTML', false, disclaimerHtml);
+      syncInputs();
+    });
   }
-  if (discInput && prevDisc) {
-    discInput.addEventListener('input', () => { prevDisc.textContent = discInput.value; });
+
+  // Insert Compliance Statement
+  const insertComplianceBtn = document.getElementById('insertComplianceBtn');
+  if (insertComplianceBtn && richEditorVisual) {
+    insertComplianceBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (isCodeView) return;
+
+      richEditorVisual.focus();
+      const selection = window.getSelection();
+      const selectedText = selection.toString() || 'Our store is fully PACT Act compliant. We verify every order meets federal and state regulations so you can shop our online vape store worry-free.';
+      const compHtml = `<p class="seo-content-compliance">${selectedText}</p>`;
+      document.execCommand('insertHTML', false, compHtml);
+      syncInputs();
+    });
   }
-  if (compInput && prevComp) {
-    compInput.addEventListener('input', () => { prevComp.textContent = compInput.value; });
+
+  // Toggle HTML Code View / Visual View
+  if (toggleCodeViewBtn && richEditorVisual && seoContentTextarea) {
+    toggleCodeViewBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      isCodeView = !isCodeView;
+
+      if (isCodeView) {
+        seoContentTextarea.value = richEditorVisual.innerHTML;
+        richEditorVisual.style.display = 'none';
+        seoContentTextarea.style.display = 'block';
+        if (codeViewBtnText) codeViewBtnText.textContent = 'Visual View';
+        toggleCodeViewBtn.classList.add('btn-admin-primary');
+        toggleCodeViewBtn.classList.remove('btn-admin-secondary');
+      } else {
+        richEditorVisual.innerHTML = seoContentTextarea.value;
+        seoContentTextarea.style.display = 'none';
+        richEditorVisual.style.display = 'block';
+        if (codeViewBtnText) codeViewBtnText.textContent = 'HTML View';
+        toggleCodeViewBtn.classList.remove('btn-admin-primary');
+        toggleCodeViewBtn.classList.add('btn-admin-secondary');
+      }
+      syncToPreview();
+    });
+  }
+
+  // On form submit, guarantee textarea has current content
+  const seoForm = document.getElementById('seoContentForm');
+  if (seoForm) {
+    seoForm.addEventListener('submit', () => {
+      if (!isCodeView && richEditorVisual && seoContentTextarea) {
+        seoContentTextarea.value = richEditorVisual.innerHTML;
+      }
+    });
   }
 });
 </script>

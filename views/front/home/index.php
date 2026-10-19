@@ -884,29 +884,7 @@ if (!empty($activeTwins)):
       <?php endif; ?>
 
       <div class="seo-content-body">
-        <?php if (!empty($seoContent['paragraph_1'])): ?>
-        <p><?= $seoContent['paragraph_1'] ?></p>
-        <?php endif; ?>
-        
-        <?php if (!empty($seoContent['paragraph_2'])): ?>
-        <p><?= $seoContent['paragraph_2'] ?></p>
-        <?php endif; ?>
-        
-        <?php if (!empty($seoContent['paragraph_3'])): ?>
-        <p><?= $seoContent['paragraph_3'] ?></p>
-        <?php endif; ?>
-        
-        <?php if (!empty($seoContent['paragraph_4'])): ?>
-        <p><?= $seoContent['paragraph_4'] ?></p>
-        <?php endif; ?>
-        
-        <?php if (!empty($seoContent['disclaimer_text'])): ?>
-        <p class="seo-content-disclaimer"><?= htmlspecialchars($seoContent['disclaimer_text']) ?></p>
-        <?php endif; ?>
-        
-        <?php if (!empty($seoContent['compliance_text'])): ?>
-        <p class="seo-content-compliance"><?= htmlspecialchars($seoContent['compliance_text']) ?></p>
-        <?php endif; ?>
+        <?= $seoContent['content'] ?? '' ?>
       </div>
     </div>
   </div>
