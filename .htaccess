@@ -1,0 +1,18 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /vapefinalwebsite/
+
+    # Direct static asset requests to the public directory
+    RewriteRule ^assets/(.*)$ public/assets/$1 [L,QSA]
+    RewriteRule ^admin/css/(.*)$ public/admin/css/$1 [L,QSA]
+    RewriteRule ^admin/js/(.*)$ public/admin/js/$1 [L,QSA]
+    RewriteRule ^admin/assets/(.*)$ public/assets/$1 [L,QSA]
+
+    # Allow direct access to existing physical files & folders
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Route all other requests through root index.php
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>

@@ -1,0 +1,45 @@
+#!/usr/bin/env php
+<?php
+/**
+ * New Vape Custom MVC Console CLI
+ */
+
+define('ROOT_PATH', dirname(__DIR__));
+require_once ROOT_PATH . '/app/Core/Autoloader.php';
+
+echo "=== New Vape MVC CLI Console ===\n";
+$command = $argv[1] ?? 'help';
+
+switch ($command) {
+    case 'migrate':
+        echo "Running database migrations...\n";
+        $cfg = config('database.connections.mysql');
+        try {
+            $hostPdo = new PDO("mysql:host={$cfg['host']};port={$cfg['port']};charset={$cfg['charset']}", $cfg['username'], $cfg['password']);
+            $hostPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $hostPdo->exec("CREATE DATABASE IF NOT EXISTS `{$cfg['database']}` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
+            $hostPdo->exec("USE `{$cfg['database']}`;");
+
+            $sql = file_get_contents(ROOT_PATH . '/database/schema.sql');
+            $hostPdo->exec($sql);
+            echo "Database `{$cfg['database']}` created and all tables & seed data migrated successfully.\n";
+        } catch (Exception $e) {
+            echo "Migration error: " . $e->getMessage() . "\n";
+        }
+        break;
+
+    case 'routes':
+        echo "Registered application routes:\n";
+        $routes = require ROOT_PATH . '/config/routes.php';
+        foreach ($routes as $uri => $action) {
+            $actionStr = is_array($action) ? implode('@', $action) : (is_string($action) ? $action : 'Closure');
+            echo sprintf("  %-30s => %s\n", $uri, $actionStr);
+        }
+        break;
+
+    default:
+        echo "Available commands:\n";
+        echo "  php bin/console migrate   Run database migrations\n";
+        echo "  php bin/console routes    List all registered routes\n";
+        break;
+}

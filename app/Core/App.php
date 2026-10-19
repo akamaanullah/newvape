@@ -1,0 +1,92 @@
+<?php
+namespace App\Core;
+
+class App
+{
+    protected $routes = [];
+
+    public function __construct()
+    {
+        $this->routes = config('routes', []);
+    }
+
+    public function run()
+    {
+        $uri = $this->resolveUri();
+
+        // Check exact route match
+        if (isset($this->routes[$uri])) {
+            return $this->dispatch($this->routes[$uri]);
+        }
+
+        // Check with / without trailing slash
+        $trimmedUri = rtrim($uri, '/');
+        if (isset($this->routes[$trimmedUri])) {
+            return $this->dispatch($this->routes[$trimmedUri]);
+        }
+
+        // Check if URI ends with .php and stripped version exists
+        if (substr($uri, -4) === '.php') {
+            $noPhp = substr($uri, 0, -4);
+            if (isset($this->routes[$noPhp])) {
+                return $this->dispatch($this->routes[$noPhp]);
+            }
+        }
+
+        // 404 Not Found
+        http_response_code(404);
+        View::render('errors.404', ['uri' => $uri]);
+        return;
+    }
+
+    protected function resolveUri()
+    {
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+
+        // Strip query string
+        $pos = strpos($requestUri, '?');
+        if ($pos !== false) {
+            $requestUri = substr($requestUri, 0, $pos);
+        }
+
+        // Remove base directory (useful when hosted in /vapefinalwebsite or /vapefinalwebsite/public)
+        $baseDir = dirname($scriptName);
+        if ($baseDir !== '/' && $baseDir !== '\\' && strpos($requestUri, $baseDir) === 0) {
+            $uri = substr($requestUri, strlen($baseDir));
+        } else {
+            $uri = $requestUri;
+        }
+
+        $uri = trim($uri, '/');
+
+        // If uri is public or starts with public/
+        if ($uri === 'public') {
+            $uri = '';
+        } elseif (strpos($uri, 'public/') === 0) {
+            $uri = substr($uri, 7);
+        }
+
+        return $uri;
+    }
+
+    protected function dispatch($handler)
+    {
+        if (is_callable($handler)) {
+            return call_user_func($handler);
+        }
+
+        if (is_array($handler)) {
+            list($controllerClass, $method) = $handler;
+            if (class_exists($controllerClass)) {
+                $controller = new $controllerClass();
+                if (method_exists($controller, $method)) {
+                    return $controller->$method();
+                }
+            }
+        }
+
+        http_response_code(500);
+        echo "<h1>500 - Route Handler Error</h1>";
+    }
+}
